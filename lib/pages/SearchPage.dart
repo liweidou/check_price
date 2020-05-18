@@ -1,3 +1,4 @@
+import 'package:check_price/pages/PriceListPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -31,12 +32,12 @@ class _SearchPageState extends State<SearchPage> {
             ),
             Container(
               margin: EdgeInsets.only(top: 20),
-              padding: EdgeInsets.only(left: 20,right: 10),
+              padding: EdgeInsets.only(left: 20, right: 10),
               width: double.infinity,
               color: Colors.white,
               child: TextField(
                 controller: nameCtr,
-                keyboardType: TextInputType.phone,
+                keyboardType: TextInputType.text,
                 decoration: InputDecoration(
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -51,8 +52,7 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                   hintText: "輸入產品名稱",
-                  hintStyle:
-                  TextStyle(fontSize: 17, color: Color(0xffA6A2BA)),
+                  hintStyle: TextStyle(fontSize: 17, color: Color(0xffA6A2BA)),
                   enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.transparent)),
                   focusedBorder: UnderlineInputBorder(
@@ -64,7 +64,12 @@ class _SearchPageState extends State<SearchPage> {
               margin: EdgeInsets.only(top: 50),
               child: FloatingActionButton(
                 onPressed: () {
-
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                          builder: (context) => PriceListPage(
+                                productName: nameCtr.text.toString(),
+                              )));
                 },
                 backgroundColor: Color(0xff568AFF),
                 child: Icon(

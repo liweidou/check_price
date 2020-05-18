@@ -20,8 +20,11 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            Expanded(
+              flex: 2,
+              child: Text(""),
+            ),
             Container(
-              margin: EdgeInsets.only(top: 199),
               child: Text(
                 "全民格價",
                 style: TextStyle(color: Colors.black, fontSize: 34),
@@ -34,8 +37,11 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(color: Colors.black, fontSize: 17),
               ),
             ),
+            Expanded(
+              flex: 3,
+              child: Text(""),
+            ),
             Container(
-              margin: EdgeInsets.only(top: 263),
               child: Row(
                 children: <Widget>[
                   Expanded(
