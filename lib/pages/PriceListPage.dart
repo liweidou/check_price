@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyrefresh/ball_pulse_footer.dart';
 import 'package:flutter_easyrefresh/ball_pulse_header.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PriceListPage extends StatefulWidget {
   String productName;
@@ -53,16 +54,23 @@ class _PriceListPageState extends State<PriceListPage> {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
-              automaticallyImplyLeading: true,
+              backgroundColor: Color(0xff4285F4),
+              leading: IconButton(
+                onPressed: ()=> Navigator.pop(context),
+                icon: Icon(Icons.arrow_back),
+                color: Colors.white,
+              ),
               centerTitle: true,
-              title: Text(productName),
+              title: Text(productName,style: TextStyle(color: Colors.white),),
               floating: true,
               pinned: true,
               snap: true,
               expandedHeight: 100,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  margin: EdgeInsets.only(top: 75, right: 16, bottom: 8),
+                  margin: EdgeInsets.only(top: 75),
+                  padding: EdgeInsets.only(right: 16),
+                  color: Colors.white,
                   width: double.infinity,
                   height: 44,
                   child: Row(
@@ -81,7 +89,7 @@ class _PriceListPageState extends State<PriceListPage> {
                           ),
                         ),
                       ),
-                      Text("當日結果"),
+                      Text("最新結果",style: TextStyle(color: Colors.black,fontSize: 18),),
                       Expanded(
                         flex: 1,
                         child: Text(""),
@@ -122,7 +130,10 @@ class _PriceListPageState extends State<PriceListPage> {
                         },
                         child: Row(
                           children: <Widget>[
-                            Icon(Icons.keyboard_arrow_down),
+                            Container(
+                              child: Icon(Icons.keyboard_arrow_down),
+                              margin: EdgeInsets.only(top: 5),
+                            ),
                             Text(
                               isSortByTime ? "按時間排序" : "按价格排序",
                               style:
@@ -132,9 +143,9 @@ class _PriceListPageState extends State<PriceListPage> {
                               onPressed: () => setState(() {
                                 isAsec = !isAsec;
                               }),
-                              icon: Icon(isAsec
-                                  ? Icons.vertical_align_top
-                                  : Icons.vertical_align_bottom),
+                              icon: FaIcon(isAsec
+                                  ? FontAwesomeIcons.sortAmountUpAlt
+                                  : FontAwesomeIcons.sortAmountDownAlt),
                             )
                           ],
                         ),
@@ -196,16 +207,16 @@ class GroupItemView extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
-            color: Color(0xffD9D9D9),
+            color: Color(0xff4285F4),
             alignment: Alignment.centerLeft,
             padding: EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 0),
             width: double.infinity,
-            height: 40,
+            height: 33,
             child: Text(
               "嘉荣超市",
               style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
+                  color: Colors.white,
+                  fontSize: 16,
                   decoration: TextDecoration.none),
             ),
           ),
@@ -280,7 +291,7 @@ class ChildIteView extends StatelessWidget {
                       child: Text(
                         "2020-05-20 23:48:29",
                         style:
-                            TextStyle(color: Color(0xff4CD964), fontSize: 18),
+                            TextStyle(color: Color(0xff0F9D58), fontSize: 14),
                       ),
                       margin: EdgeInsets.only(top: 5),
                     ),
@@ -292,8 +303,8 @@ class ChildIteView extends StatelessWidget {
                 child: Text(""),
               ),
               Text(
-                "55.5",
-                style: TextStyle(color: Color(0xff0069FF), fontSize: 24),
+                "\$55.5",
+                style: TextStyle(color: Color(0xff4285F4), fontSize: 24),
               ),
               Container(
                 margin: EdgeInsets.only(right: 15),

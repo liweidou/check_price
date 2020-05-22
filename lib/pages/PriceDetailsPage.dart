@@ -1,3 +1,4 @@
+import 'package:check_price/pages/ToCorrectPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +35,11 @@ class _PriceDetailsPageState extends State<PriceDetailsPage> {
         centerTitle: true,
         actions: <Widget>[
           FlatButton(
-            onPressed: () {},
+            onPressed: () async {
+              bool isFinish = await Navigator.push(context,
+                  CupertinoPageRoute(builder: (context) => ToCorrectPage()));
+              if (isFinish) Navigator.pop(context);
+            },
             child: Text(
               "纠错",
               style: TextStyle(color: Colors.white, fontSize: 17),
@@ -48,33 +53,33 @@ class _PriceDetailsPageState extends State<PriceDetailsPage> {
           children: <Widget>[
             Container(
               width: double.infinity,
-              height: 90,
+              height: 98,
               color: Colors.black,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Column(
                 children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      Container(
-                        child: Text("新苗超市",style: TextStyle(color: Colors.white,fontSize: 18),),
-                        margin: EdgeInsets.only(left: 16,top: 16),
-                      ),
-                      Container(
-                        child: Text("2020-05-20 23:48:29",style: TextStyle(color: Colors.white,fontSize: 18),),
-                        margin: EdgeInsets.only(left: 16,top: 5),
-                      )
-                    ],
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Text(""),
+                  Container(
+                    child: Text(
+                      "商店：新苗超市",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                    margin: EdgeInsets.only(left: 16, top: 6),
                   ),
                   Container(
-                    child: Text("15.5",style: TextStyle(color: Colors.white,fontSize: 24),),
-                    margin: EdgeInsets.only(right: 27),
+                    child: Text(
+                      "時間：2020-05-20 23:48:29",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                    margin: EdgeInsets.only(left: 16, top: 2),
+                  ),
+                  Container(
+                    child: Text(
+                      "價格：\$15.5",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                    margin: EdgeInsets.only(left: 16, top: 2),
                   )
                 ],
+                crossAxisAlignment: CrossAxisAlignment.start,
               ),
             ),
             Expanded(

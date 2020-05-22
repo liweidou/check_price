@@ -24,17 +24,31 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_guidance_plugin:
+    #git 方式依赖
+    git:
+      #仓库地址
+      url: https://github.com/zhaolongs/flutter_guidance_plugin.git
+      # 分支
+      ref: master
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  shared_preferences: "^0.4.2"
-  event_bus: ^1.1.0
-  flutter_easyrefresh: ^2.0.8
+  shared_preferences: ^0.5.7+2
+  event_bus: ^1.1.1
+  flutter_easyrefresh: ^2.1.1
   cupertino_icons: ^0.1.3
-#  admob_flutter: ^0.3.4
-  http: '>=0.11.3+12'
-  image_picker: ^0.6.6+1
+  fluttertoast: ^4.0.0
+  font_awesome_flutter: ^8.8.1
+#  image_picker: ^0.6.6+1
   firebase_admob: ^0.9.3+2
+  dio: ^3.0.9
+  firebase_storage: ^3.1.5
+  firebase_core: ^0.4.4+3
+  uuid: 2.0.4
+  camera_camera: ^1.0.32+1
+  flutter_native_image: ^0.0.5+2
 
 dev_dependencies:
   flutter_test:

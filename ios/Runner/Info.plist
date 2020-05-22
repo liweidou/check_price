@@ -30,6 +30,10 @@
     <string>Used to demonstrate image picker plugin</string>
     <key>GADApplicationIdentifier</key>
     <string>ca-app-pub-5426843524329045~5102800320</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Can I use the camera please?</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Can I use the mic please?</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

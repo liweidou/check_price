@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "336897268673",
+    "firebase_url": "https://pricetags-277703.firebaseio.com",
+    "project_id": "pricetags-277703",
+    "storage_bucket": "pricetags-277703.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336897268673:android:715255b687b9ef5bafed40",
+        "android_client_info": {
+          "package_name": "com.infitack.check_price"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "336897268673-me4hledm0tau49tvubkt3me473mdhj72.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.infitack.check_price",
+            "certificate_hash": "27d15eb2e7a53a4eff3b60644f7b5632673c375d"
+          }
+        },
+        {
+          "client_id": "336897268673-rd5th0bqcv2vs1f25h34mt476orsrhe3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBs9IawWbpVDlc1YuGwBdkCjyUYB6F8uDU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "336897268673-rd5th0bqcv2vs1f25h34mt476orsrhe3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

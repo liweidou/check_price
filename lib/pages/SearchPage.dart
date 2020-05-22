@@ -32,51 +32,77 @@ class _SearchPageState extends State<SearchPage> {
             ),
             Container(
               margin: EdgeInsets.only(top: 20),
-              padding: EdgeInsets.only(left: 20, right: 10),
+              padding: EdgeInsets.only(left: 28, right: 27),
               width: double.infinity,
-              color: Colors.white,
-              child: TextField(
-                controller: nameCtr,
-                keyboardType: TextInputType.text,
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        nameCtr.text = "";
-                      });
-                    },
-                    icon: Icon(
-                      Icons.cancel,
-                      color: Colors.grey,
-                      size: 20,
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    child: TextField(
+                      textAlignVertical: TextAlignVertical.center,
+                      controller: nameCtr,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.only(left: 21, right: 21),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              nameCtr.text = "";
+                            });
+                          },
+                          icon: Icon(
+                            Icons.cancel,
+                            color: Colors.grey,
+                            size: 20,
+                          ),
+                        ),
+                        hintText: "搜尋產品名稱",
+                        hintStyle:
+                        TextStyle(fontSize: 17, color: Color(0xffA6A2BA)),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.only(topLeft: Radius
+                                .circular(25), bottomLeft: Radius.circular(25)),
+                            borderSide: BorderSide(color: Color(0xff979797))),
+                        focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.only(topLeft: Radius
+                                .circular(25), bottomLeft: Radius.circular(25)),
+                            borderSide: BorderSide(color: Color(0xffF4B400))),
+                      ),
                     ),
+                    padding: EdgeInsets.only(right: 52),
+                    height: 50,
                   ),
-                  hintText: "輸入產品名稱",
-                  hintStyle: TextStyle(fontSize: 17, color: Color(0xffA6A2BA)),
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.transparent)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.transparent)),
-                ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 50),
-              child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                          builder: (context) => PriceListPage(
-                                productName: nameCtr.text.toString(),
-                              )));
-                },
-                backgroundColor: Color(0xff568AFF),
-                child: Icon(
-                  Icons.search,
-                  color: Colors.white,
-                  size: 30,
-                ),
+                  Positioned(
+                    right: 0,
+                    child: Container(
+                      width: 56,
+                      height: 48,
+                      child: RaisedButton(
+                        color: Color(0xff568AFF),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(topRight: Radius
+                                .circular(27), bottomRight: Radius.circular(27))
+                        ),
+                        onPressed: () {
+                          if (!nameCtr.text.isEmpty) {
+                            Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                    builder: (context) =>
+                                        PriceListPage(
+                                          productName: nameCtr.text.toString(),
+                                        )));
+                          }
+                        },
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             )
           ],

@@ -1,53 +1,99 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:check_price/customWidgets/Camera.dart';
+import 'package:check_price/customWidgets/CameraFocus.dart';
+import 'package:check_price/customWidgets/LoadingDialog.dart';
+import 'package:check_price/pages/ThanksPage.dart';
+import 'package:check_price/pages/ToCorrectPage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class UploadPage extends StatefulWidget {
+  File firstFile;
+
+  UploadPage(this.firstFile);
+
   @override
-  _UploadPageState createState() => _UploadPageState();
+  _UploadPageState createState() => _UploadPageState(firstFile);
 }
 
 class _UploadPageState extends State<UploadPage> {
   List<File> fileList = List();
-  int getImagePos = 0;
+  int neekUploadFileSize = 0;
+  FirebaseStorage storage;
 
-  Future getImage(ImageSource imageSource) async {
-    var image = await ImagePicker.pickImage(source: imageSource);
-    setState(() {
-      if (image != null) {
-        fileList.add(image);
-      }
-      print(image.path);
-    });
-    if (getImagePos == 1) {
-      getImage(ImageSource.camera);
-    }
+  _UploadPageState(File firstFile) {
+    fileList.add(firstFile);
   }
 
   @override
-  void initState() {
+  void initState(){
     // TODO: implement initState
     super.initState();
+    initFireBase();
+  }
+
+  void initFireBase() async{
+    final FirebaseApp app = await FirebaseApp.configure(
+      name: 'test',
+      options: FirebaseOptions(
+        googleAppID: (Platform.isIOS || Platform.isMacOS)
+            ? '1:336897268673:ios:b457d411d3c1cf18afed40'
+            : '1:336897268673:android:715255b687b9ef5bafed40',
+        gcmSenderID: '336897268673',
+        apiKey: 'AIzaSyC3tNQN4KPOr3rD2annr2a_iagwOPR7kQw',
+        projectID: 'pricetags-277703',
+      ),
+    );
+    storage = FirebaseStorage(
+        app: app, storageBucket: 'gs://pricetags-277703.appspot.com');
+  }
+
+  Future<void> _uploadFiles() async {
+    showDialog(context: context,builder: (context)=> LoadingDialog("正在上傳收據..."));
+    String uuid = Uuid().v1();
+    for (int i = 0; i < fileList.length; i++) {
+      final StorageReference ref =
+          storage.ref().child('image').child('$uuid=image$i.jpg');
+      final StorageUploadTask uploadTask = ref.putFile(fileList[i]);
+      final StreamSubscription<StorageTaskEvent> streamSubscription = uploadTask.events.listen((event) {
+             print('EVENT ${event.type}');
+             if(uploadTask.isComplete){
+               print('streamSubscription.uploadTask.isComplete');
+             }
+      });
+      await uploadTask.onComplete;
+      print('uploadTask.isComplete');
+      neekUploadFileSize--;
+      streamSubscription.cancel();
+      if(neekUploadFileSize == 0){
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.push(
+            context, CupertinoPageRoute(builder: (context) => ThanksPage()));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        backgroundColor: Color(0xffF4B400),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () => Navigator.pop(context),
+        ),
         centerTitle: true,
-        title: Text("上傳單據"),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.file_upload,
-              color: Colors.blue,
-            ),
-          )
-        ],
+        title: Text(
+          "照片",
+          style: TextStyle(color: Colors.white),
+        )
       ),
       body: Container(
         width: double.infinity,
@@ -65,83 +111,79 @@ class _UploadPageState extends State<UploadPage> {
                 //一行的Widget数量
                 crossAxisCount: 2,
                 //子Widget宽高比例
-                childAspectRatio: 1.0,
+                childAspectRatio: 0.666,
                 //子Widget列表
                 children: getWidgetList(),
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 50,bottom: 110),
-              child: FloatingActionButton(
+              width: 160,
+              height: 70,
+              margin: EdgeInsets.only(bottom: 15),
+              child: RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(35),
+                ),
                 onPressed: () {
-                  showSelectImageDialog();
+                  takePhoto();
                 },
-                backgroundColor: Color(0xff003153),
-                child: Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 34,
+                color: Color(0xffF4B400),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                        margin: EdgeInsets.only(left: 10),
+                        child: Icon(
+                          Icons.crop_free,
+                          color: Colors.white,
+                          size: 41,
+                        )),
+                    Container(
+                      margin: EdgeInsets.only(left: 8),
+                      child: Text(
+                        "繼續",
+                        style: TextStyle(color: Colors.white, fontSize: 21),
+                      ),
+                    )
+                  ],
                 ),
               ),
-            )
+            ),
+            Container(
+              width: 160,
+              height: 70,
+              margin: EdgeInsets.only(bottom: 95),
+              child: RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(35),
+                ),
+                onPressed: () {
+                  if (fileList.length != 0) {
+                    neekUploadFileSize = fileList.length;
+                    _uploadFiles();
+                  } else {}
+                },
+                color: Color(0xff0F9D58),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                        margin: EdgeInsets.only(left: 10),
+                        child: Icon(
+                          Icons.cloud_upload,
+                          color: Colors.white,
+                          size: 41,
+                        )),
+                    Container(
+                      margin: EdgeInsets.only(left: 8),
+                      child: Text(
+                        "上傳",
+                        style: TextStyle(color: Colors.white, fontSize: 21),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void showSelectImageDialog() {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: Text(
-          '更多操作',
-          style: TextStyle(fontSize: 22),
-        ), //标题
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              getImagePos = 0;
-              getImage(ImageSource.camera);
-            },
-            child: Text(
-              '相機(短單據)',
-              style: TextStyle(color: Color(0xff007AFF), fontSize: 20),
-            ),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              getImagePos = 1;
-              getImage(ImageSource.camera);
-            },
-            child: Text(
-              '相機(長單據)',
-              style: TextStyle(color: Color(0xff007AFF), fontSize: 20),
-            ),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              getImagePos = 2;
-              getImage(ImageSource.gallery);
-            },
-            child: Text(
-              '相册',
-              style: TextStyle(color: Color(0xff007AFF), fontSize: 20),
-            ),
-          )
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          //取消按钮
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text(
-            '取消',
-            style: TextStyle(color: Color(0xff007AFF), fontSize: 20),
-          ),
         ),
       ),
     );
@@ -158,9 +200,11 @@ class _UploadPageState extends State<UploadPage> {
           Positioned(
             left: 0,
             right: 0,
-            child: Image.file(
-              item,
-              fit: BoxFit.fill,
+            child: Container(
+              child: Image.file(
+                item,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Positioned(
@@ -172,10 +216,31 @@ class _UploadPageState extends State<UploadPage> {
                 });
               },
               icon: Icon(Icons.cancel),
+              color: Colors.black,
             ),
           )
         ],
       ),
     );
+  }
+
+  void takePhoto() async {
+    File val = await showDialog(
+        context: context,
+        builder: (context) => Camera(
+              imageMask: CameraFocus.rectangle(
+                color: Colors.black.withOpacity(0.5),
+              ),
+              mode: CameraMode.fullscreen,
+              orientationEnablePhoto: CameraOrientation.portrait,
+            ));
+
+    if (val == null) {
+//      if (fileList.length == 0) Navigator.pop(context);
+    } else {
+      setState(() {
+        fileList.add(val);
+      });
+    }
   }
 }
