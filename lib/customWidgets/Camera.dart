@@ -244,7 +244,7 @@ class _CameraState extends State<Camera> {
                                           File croppedFile = await FlutterNativeImage.cropImage(bloc.imagePath.value.path,
                                               (properties.width / 16).toInt(), (properties.height / 24).toInt(),
                                               (properties.width - properties.width / 8).toInt(),
-                                              (properties.height - properties.height / 3.5).toInt());
+                                              (properties.height - properties.height / 3.3).toInt());
                                           if (widget.onFile == null)
                                             Navigator.pop(
                                                 context, croppedFile);
