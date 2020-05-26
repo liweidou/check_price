@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 //    childDirected: true,
 //    nonPersonalizedAds: true,
 //  );
-//
+
 //  BannerAd _bannerAd;
 //
 //  BannerAd createBannerAd() {

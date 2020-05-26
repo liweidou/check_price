@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
-//import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 
 enum CameraOrientation { landscape, portrait, all }
 enum CameraMode { fullscreen, normal }
@@ -238,18 +238,18 @@ class _CameraState extends State<Camera> {
                                               color: Colors.white),
                                         ),
                                         onPressed: () async {
-//                                          ImageProperties properties = await FlutterNativeImage.getImageProperties(bloc.imagePath.value.path);
-//                                          print("properties.width:" + properties.width.toString() +
-//                                              " properties.height:" + properties.height.toString());
-//                                          File croppedFile = await FlutterNativeImage.cropImage(bloc.imagePath.value.path,
-//                                              (properties.width / 16).toInt(), (properties.height / 24).toInt(),
-//                                              (properties.width - properties.width / 8).toInt(),
-//                                              (properties.height - properties.height / 3.3).toInt());
+                                          ImageProperties properties = await FlutterNativeImage.getImageProperties(bloc.imagePath.value.path);
+                                          print("properties.width:" + properties.width.toString() +
+                                              " properties.height:" + properties.height.toString());
+                                          File croppedFile = await FlutterNativeImage.cropImage(bloc.imagePath.value.path,
+                                              (properties.width / 16).toInt(), (properties.height / 24).toInt(),
+                                              (properties.width - properties.width / 8).toInt(),
+                                              (properties.height - properties.height / 3.3).toInt());
                                           if (widget.onFile == null)
                                             Navigator.pop(
-                                                context, bloc.imagePath.value);
+                                                context, croppedFile);
                                           else {
-                                            widget.onFile(bloc.imagePath.value);
+                                            widget.onFile(croppedFile);
                                           }
                                         },
                                       ),
