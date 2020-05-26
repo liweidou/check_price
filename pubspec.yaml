@@ -40,10 +40,10 @@ dependencies:
   cupertino_icons: ^0.1.3
   font_awesome_flutter: ^8.8.1
 #  image_picker: ^0.6.6+1
-  firebase_admob: ^0.9.3+2
   dio: ^3.0.9
-#  firebase_storage: ^3.1.5
-#  firebase_core: ^0.4.4+3
+  firebase_admob: ^0.9.3+2
+  firebase_storage: ^3.1.5
+  firebase_core: ^0.4.4+3
   uuid: 2.0.4
   camera_camera: ^1.0.32+1
   flutter_native_image: ^0.0.5+2

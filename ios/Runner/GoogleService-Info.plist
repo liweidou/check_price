@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:336897268673:ios:b457d411d3c1cf18afed40</string>
+	<string>1:336897268673:ios:7fa150b8347f588bafed40</string>
 	<key>DATABASE_URL</key>
 	<string>https://pricetags-277703.firebaseio.com</string>
 </dict>
