@@ -5,8 +5,8 @@ import 'package:check_price/customWidgets/Camera.dart';
 import 'package:check_price/customWidgets/CameraFocus.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/ThanksPage.dart';
-//import 'package:firebase_core/firebase_core.dart';
-//import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -23,7 +23,7 @@ class UploadPage extends StatefulWidget {
 class _UploadPageState extends State<UploadPage> {
   List<File> fileList = List();
   int neekUploadFileSize = 0;
-//  FirebaseStorage storage;
+  FirebaseStorage storage;
 
   _UploadPageState(File firstFile) {
     fileList.add(firstFile);
@@ -33,50 +33,50 @@ class _UploadPageState extends State<UploadPage> {
   void initState(){
     // TODO: implement initState
     super.initState();
-//    initFireBase();
+    initFireBase();
   }
 
-//  void initFireBase() async{
-//    final FirebaseApp app = await FirebaseApp.configure(
-//      name: 'test',
-//      options: FirebaseOptions(
-//        googleAppID: (Platform.isIOS || Platform.isMacOS)
-//            ? '1:336897268673:ios:7fa150b8347f588bafed40'
-//            : '1:336897268673:android:715255b687b9ef5bafed40',
-//        gcmSenderID: '336897268673',
-//        apiKey: 'AIzaSyC3tNQN4KPOr3rD2annr2a_iagwOPR7kQw',
-//        projectID: 'pricetags-277703',
-//      ),
-//    );
-//    storage = FirebaseStorage(
-//        app: app, storageBucket: 'gs://pricetags-277703.appspot.com');
-//  }
+  void initFireBase() async{
+    final FirebaseApp app = await FirebaseApp.configure(
+      name: 'test',
+      options: FirebaseOptions(
+        googleAppID: (Platform.isIOS || Platform.isMacOS)
+            ? '1:336897268673:ios:7fa150b8347f588bafed40'
+            : '1:336897268673:android:715255b687b9ef5bafed40',
+        gcmSenderID: '336897268673',
+        apiKey: 'AIzaSyC3tNQN4KPOr3rD2annr2a_iagwOPR7kQw',
+        projectID: 'pricetags-277703',
+      ),
+    );
+    storage = FirebaseStorage(
+        app: app, storageBucket: 'gs://pricetags-277703.appspot.com');
+  }
 
-//  Future<void> _uploadFiles() async {
-//    showDialog(context: context,builder: (context)=> LoadingDialog("正在上傳收據..."));
-//    String uuid = Uuid().v1();
-//    for (int i = 0; i < fileList.length; i++) {
-//      final StorageReference ref =
-//          storage.ref().child('image').child('$uuid=image$i.jpg');
-//      final StorageUploadTask uploadTask = ref.putFile(fileList[i]);
-//      final StreamSubscription<StorageTaskEvent> streamSubscription = uploadTask.events.listen((event) {
-//             print('EVENT ${event.type}');
-//             if(uploadTask.isComplete){
-//               print('streamSubscription.uploadTask.isComplete');
-//             }
-//      });
-//      await uploadTask.onComplete;
-//      print('uploadTask.isComplete');
-//      neekUploadFileSize--;
-//      streamSubscription.cancel();
-//      if(neekUploadFileSize == 0){
-//        Navigator.pop(context);
-//        Navigator.pop(context);
-//        Navigator.push(
-//            context, CupertinoPageRoute(builder: (context) => ThanksPage()));
-//      }
-//    }
-//  }
+  Future<void> _uploadFiles() async {
+    showDialog(context: context,builder: (context)=> LoadingDialog("正在上傳收據..."));
+    String uuid = Uuid().v1();
+    for (int i = 0; i < fileList.length; i++) {
+      final StorageReference ref =
+          storage.ref().child('image').child('$uuid=image$i.jpg');
+      final StorageUploadTask uploadTask = ref.putFile(fileList[i]);
+      final StreamSubscription<StorageTaskEvent> streamSubscription = uploadTask.events.listen((event) {
+             print('EVENT ${event.type}');
+             if(uploadTask.isComplete){
+               print('streamSubscription.uploadTask.isComplete');
+             }
+      });
+      await uploadTask.onComplete;
+      print('uploadTask.isComplete');
+      neekUploadFileSize--;
+      streamSubscription.cancel();
+      if(neekUploadFileSize == 0){
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.push(
+            context, CupertinoPageRoute(builder: (context) => ThanksPage()));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +158,7 @@ class _UploadPageState extends State<UploadPage> {
                 onPressed: () {
                   if (fileList.length != 0) {
                     neekUploadFileSize = fileList.length;
-//                    _uploadFiles();
+                    _uploadFiles();
                   } else {}
                 },
                 color: Color(0xff0F9D58),
