@@ -85,13 +85,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.9"
-  event_bus:
-    dependency: "direct main"
-    description:
-      name: event_bus
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.1.1"
   firebase:
     dependency: transitive
     description:
@@ -99,13 +92,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "7.3.0"
-  firebase_admob:
-    dependency: "direct main"
-    description:
-      name: firebase_admob
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.9.3+2"
   firebase_core:
     dependency: "direct main"
     description:
@@ -155,13 +141,6 @@ packages:
       url: "https://github.com/zhaolongs/flutter_guidance_plugin.git"
     source: git
     version: "0.0.3"
-  flutter_native_image:
-    dependency: "direct main"
-    description:
-      name: flutter_native_image
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.0.5+2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -172,13 +151,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  fluttertoast:
-    dependency: "direct main"
-    description:
-      name: fluttertoast
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "4.0.1"
   font_awesome_flutter:
     dependency: "direct main"
     description:

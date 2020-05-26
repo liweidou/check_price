@@ -1,4 +1,3 @@
-import 'package:event_bus/event_bus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Global{
@@ -7,5 +6,4 @@ class Global{
   static SharedPreferences preferences;
   static int colorPrimaryDark = 0xff8273BB;
   static int colorAccent = 0xffFFC526;
-  static EventBus eventBus;
 }
