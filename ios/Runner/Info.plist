@@ -53,5 +53,37 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+    <key>CLIENT_ID</key>
+	<string>336897268673-3hl035qlpnt5fco57ttu04s2okmtcdq9.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.336897268673-3hl035qlpnt5fco57ttu04s2okmtcdq9</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>336897268673-me4hledm0tau49tvubkt3me473mdhj72.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBx0GECRjd0nmE6Tdc_ku6SXQ3aLf3Vujo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>336897268673</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.infitack.checkPrice</string>
+	<key>PROJECT_ID</key>
+	<string>pricetags-277703</string>
+	<key>STORAGE_BUCKET</key>
+	<string>pricetags-277703.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:336897268673:ios:7fa150b8347f588bafed40</string>
+	<key>DATABASE_URL</key>
+	<string>https://pricetags-277703.firebaseio.com</string>
 </dict>
 </plist>
