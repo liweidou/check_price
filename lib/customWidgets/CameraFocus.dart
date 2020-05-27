@@ -123,21 +123,21 @@ class _RectangleModePhoto extends CustomClipper<Path> {
   Path getClip(Size size) {
     var path = Path();
     var reactPath = Path();
+    Size size = MediaQuery.of(context).size;
+    double width = size.width;
+    double height = size.height;
 
-    print("size.width:" + MediaQuery.of(context).size.width.toString() +
-        " size.height:" + MediaQuery.of(context).size.height.toString());
-
-    reactPath.moveTo(getIntDoubleValue(MediaQuery.of(context).size.width / 16),
-        getIntDoubleValue(MediaQuery.of(context).size.height / 24));
-    reactPath.lineTo(getIntDoubleValue(MediaQuery.of(context).size.width / 16),
-        getIntDoubleValue(MediaQuery.of(context).size.height - MediaQuery.of(context).size.height / 3.5));
-    reactPath.lineTo(getIntDoubleValue(MediaQuery.of(context).size.width - size.width / 16),
-        getIntDoubleValue(MediaQuery.of(context).size.height - MediaQuery.of(context).size.height / 3.5));
-    reactPath.lineTo(getIntDoubleValue(MediaQuery.of(context).size.width - MediaQuery.of(context).size.width / 16) ,
-        getIntDoubleValue(MediaQuery.of(context).size.height / 24));
+    reactPath.moveTo(getIntDoubleValue(width / 16),
+        getIntDoubleValue(height / 24));
+    reactPath.lineTo(getIntDoubleValue(width / 16),
+        getIntDoubleValue(height - height / 3.5));
+    reactPath.lineTo(getIntDoubleValue(width - width / 16),
+        getIntDoubleValue(height - height / 3.5));
+    reactPath.lineTo(getIntDoubleValue(width - width / 16) ,
+        getIntDoubleValue(height / 24));
 
     path.addPath(reactPath, Offset(0, 0));
-    path.addRect(Rect.fromLTWH(0.0, 0.0, size.width, MediaQuery.of(context).size.height));
+    path.addRect(Rect.fromLTWH(0.0, 0.0, width, height));
     path.fillType = PathFillType.evenOdd;
 /*
     path.moveTo(size.width/4, size.height/4);

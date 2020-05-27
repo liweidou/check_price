@@ -30,13 +30,13 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   @override
-  void initState(){
+  void initState() {
     // TODO: implement initState
     super.initState();
     initFireBase();
   }
 
-  void initFireBase() async{
+  void initFireBase() async {
     final FirebaseApp app = await FirebaseApp.configure(
       name: 'test',
       options: FirebaseOptions(
@@ -53,23 +53,25 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _uploadFiles() async {
-    showDialog(context: context,builder: (context)=> LoadingDialog("正在上傳收據..."));
+    showDialog(
+        context: context, builder: (context) => LoadingDialog("正在上傳收據..."));
     String uuid = Uuid().v1();
     for (int i = 0; i < fileList.length; i++) {
       final StorageReference ref =
           storage.ref().child('image').child('$uuid=image$i.jpg');
       final StorageUploadTask uploadTask = ref.putFile(fileList[i]);
-      final StreamSubscription<StorageTaskEvent> streamSubscription = uploadTask.events.listen((event) {
-             print('EVENT ${event.type}');
-             if(uploadTask.isComplete){
-               print('streamSubscription.uploadTask.isComplete');
-             }
+      final StreamSubscription<StorageTaskEvent> streamSubscription =
+          uploadTask.events.listen((event) {
+        print('EVENT ${event.type}');
+        if (uploadTask.isComplete) {
+          print('streamSubscription.uploadTask.isComplete');
+        }
       });
       await uploadTask.onComplete;
       print('uploadTask.isComplete');
       neekUploadFileSize--;
       streamSubscription.cancel();
-      if(neekUploadFileSize == 0){
+      if (neekUploadFileSize == 0) {
         Navigator.pop(context);
         Navigator.pop(context);
         Navigator.push(
@@ -82,18 +84,17 @@ class _UploadPageState extends State<UploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xffF4B400),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: Text(
-          "照片",
-          style: TextStyle(color: Colors.white),
-        )
-      ),
+          backgroundColor: Color(0xffF4B400),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            color: Colors.white,
+            onPressed: () => Navigator.pop(context),
+          ),
+          centerTitle: true,
+          title: Text(
+            "照片",
+            style: TextStyle(color: Colors.white),
+          )),
       body: Container(
         width: double.infinity,
         child: Column(
@@ -230,8 +231,6 @@ class _UploadPageState extends State<UploadPage> {
               imageMask: CameraFocus.rectangle(
                 color: Colors.black.withOpacity(0.5),
               ),
-              mode: CameraMode.fullscreen,
-              orientationEnablePhoto: CameraOrientation.portrait,
             ));
 
     if (val == null) {

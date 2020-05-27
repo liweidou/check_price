@@ -74,7 +74,6 @@ class _CameraState extends State<Camera> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    Size sizeImage = size;
     double width = size.width;
     double height = size.height;
 
@@ -238,13 +237,16 @@ class _CameraState extends State<Camera> {
                                               color: Colors.white),
                                         ),
                                         onPressed: () async {
-                                          ImageProperties properties = await FlutterNativeImage.getImageProperties(bloc.imagePath.value.path);
-                                          print("properties.width:" + properties.width.toString() +
-                                              " properties.height:" + properties.height.toString());
-                                          File croppedFile = await FlutterNativeImage.cropImage(bloc.imagePath.value.path,
-                                              (properties.width / 16).toInt(), (properties.height / 24).toInt(),
-                                              (properties.width - properties.width / 8).toInt(),
-                                              (properties.height - properties.height / 3.3).toInt());
+                                          File compressedFile = await FlutterNativeImage.compressImage(bloc.imagePath.value.path,
+                                              quality: 100,targetWidth: width.toInt(),targetHeight: height.toInt());
+                                          File croppedFile =
+                                          await FlutterNativeImage
+                                              .cropImage(
+                                              compressedFile.path,
+                                              (width / 16).toInt(),
+                                              (height / 24).toInt(),
+                                              (width - width / 16).toInt(),
+                                              (height - height / 3.5).toInt());
                                           if (widget.onFile == null)
                                             Navigator.pop(
                                                 context, croppedFile);

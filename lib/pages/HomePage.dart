@@ -174,8 +174,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               imageMask: CameraFocus.rectangle(
                 color: Colors.black.withOpacity(0.5),
               ),
-              mode: CameraMode.fullscreen,
-              orientationEnablePhoto: CameraOrientation.portrait,
             ));
 
     if (val != null) {
