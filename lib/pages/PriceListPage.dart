@@ -1,10 +1,17 @@
+import 'dart:convert';
+
+import 'package:check_price/beans/ProductResponeBean.dart';
 import 'package:check_price/customWidgets/PopupWindow.dart';
+import 'package:check_price/pages/HomePage.dart';
 import 'package:check_price/pages/PriceDetailsPage.dart';
+import 'package:check_price/utils/Global.dart';
+import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyrefresh/ball_pulse_footer.dart';
 import 'package:flutter_easyrefresh/ball_pulse_header.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PriceListPage extends StatefulWidget {
@@ -19,7 +26,7 @@ class PriceListPage extends StatefulWidget {
 
 class _PriceListPageState extends State<PriceListPage> {
   String productName;
-  bool isTodayResluts = false;
+  bool isTodayResluts = true;
   bool isAsec = true;
   bool isSortByTime = true;
 
@@ -27,9 +34,11 @@ class _PriceListPageState extends State<PriceListPage> {
 
   EasyRefreshController refreshController = EasyRefreshController();
 
-  List<List<String>> dataList = List();
+  List<Results> dataList = List();
 
   List<String> sortTitles = List();
+
+  int currentPage = 1;
 
   @override
   void initState() {
@@ -56,12 +65,15 @@ class _PriceListPageState extends State<PriceListPage> {
             SliverAppBar(
               backgroundColor: Color(0xff4285F4),
               leading: IconButton(
-                onPressed: ()=> Navigator.pop(context),
+                onPressed: () => Navigator.pop(context),
                 icon: Icon(Icons.arrow_back),
                 color: Colors.white,
               ),
               centerTitle: true,
-              title: Text(productName,style: TextStyle(color: Colors.white),),
+              title: Text(
+                productName,
+                style: TextStyle(color: Colors.white),
+              ),
               floating: true,
               pinned: true,
               snap: true,
@@ -89,7 +101,10 @@ class _PriceListPageState extends State<PriceListPage> {
                           ),
                         ),
                       ),
-                      Text("最新結果",style: TextStyle(color: Colors.black,fontSize: 18),),
+                      Text(
+                        "最新結果",
+                        style: TextStyle(color: Colors.black, fontSize: 18),
+                      ),
                       Expanded(
                         flex: 1,
                         child: Text(""),
@@ -157,7 +172,7 @@ class _PriceListPageState extends State<PriceListPage> {
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                  (context, index) => GroupItemView(datalist: dataList[index]),
+                  (context, index) => GroupItemView(results: dataList[index]),
                   childCount: dataList.length),
             )
           ],
@@ -167,39 +182,157 @@ class _PriceListPageState extends State<PriceListPage> {
   }
 
   Future<void> onRefreshData() async {
-    await Future.delayed(Duration(seconds: 1), () {
-      dataList.clear();
-      for (int i = 0; i < 3; i++) {
-        List<String> addlist = List();
-        for (int j = 0; j < 3; j++) {
-          addlist.add("合味道咖喱味");
+    NetworkUtil.isConnected().then((value) {
+      if (value) {
+        if (Global.API_TOKEN.isEmpty) {
+          NetworkUtil.doLogin(() {
+            currentPage = 1;
+            NetworkUtil.get(getUrl(), true,
+                (respone) {
+              ProductResponeBean productResponeBean =
+                  ProductResponeBean.fromJson(
+                      jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+              dataList.clear();
+              dataList.addAll(productResponeBean.results);
+              setState(() {});
+            }, (erro) {});
+          });
+        } else {
+          currentPage = 1;
+          NetworkUtil.get(getUrl(), true,
+              (respone) {
+            ProductResponeBean productResponeBean = ProductResponeBean.fromJson(
+                jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+            dataList.clear();
+            dataList.addAll(productResponeBean.results);
+            setState(() {});
+          }, (erro) {});
         }
-        dataList.add(addlist);
+      } else {
+        Fluttertoast.showToast(msg: "請檢查網絡！");
       }
-      setState(() {});
       refreshController.finishRefresh(success: true);
     });
   }
 
   Future<void> onLoadMoreData() async {
-    await Future.delayed(Duration(seconds: 1), () {
-      for (int i = 0; i < 3; i++) {
-        List<String> addlist = List();
-        for (int j = 0; j < 3; j++) {
-          addlist.add("合味道咖喱味");
+    NetworkUtil.isConnected().then((value) {
+      if (value) {
+        if (Global.API_TOKEN.isEmpty) {
+          NetworkUtil.doLogin(() {
+            NetworkUtil.get(getUrl(), true, (respone) {
+              currentPage++;
+              ProductResponeBean productResponeBean =
+                  ProductResponeBean.fromJson(
+                      jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+              dataList.addAll(productResponeBean.results);
+              setState(() {});
+            }, (erro) {});
+          });
+        } else {
+          NetworkUtil.get(getUrl(), true, (respone) {
+            currentPage++;
+            ProductResponeBean productResponeBean = ProductResponeBean.fromJson(
+                jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+            dataList.addAll(productResponeBean.results);
+            setState(() {});
+          }, (erro) {
+            NetworkUtil.doLogin(() {
+              NetworkUtil.get("/product?page=" + currentPage.toString(), true,
+                  (respone) {
+                currentPage++;
+                ProductResponeBean productResponeBean =
+                    ProductResponeBean.fromJson(
+                        jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+                dataList.addAll(productResponeBean.results);
+                setState(() {});
+              }, (erro) {});
+            });
+          });
         }
-        dataList.add(addlist);
+      } else {
+        Fluttertoast.showToast(msg: "請檢查網絡！");
       }
-      setState(() {});
       refreshController.finishLoad(success: true, noMore: false);
     });
   }
+
+  String getUrl() {
+    String url = "";
+    if (isTodayResluts) {
+      if (isSortByTime) {
+        if (isAsec) {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&new=true" +
+              "&ordering=product__uploaddate";
+        } else {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&new=true" +
+              "&ordering=-product__uploaddate";
+        }
+      } else {
+        if (isAsec) {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&new=true" +
+              "&ordering=-product__price";
+        } else {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&new=true" +
+              "&ordering=product__price";
+        }
+      }
+    } else {
+      if (isSortByTime) {
+        if (isAsec) {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&ordering=product__uploaddate";
+        } else {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&ordering=-product__uploaddate";
+        }
+      } else {
+        if (isAsec) {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&ordering=-product__price";
+        } else {
+          url = "/product?page=" +
+              currentPage.toString() +
+              "&search=" +
+              productName +
+              "&ordering=product__price";
+        }
+      }
+    }
+    return url;
+  }
 }
 
-class GroupItemView extends StatelessWidget {
-  List<String> datalist;
 
-  GroupItemView({this.datalist});
+class GroupItemView extends StatelessWidget {
+  Results results;
+
+  GroupItemView({this.results});
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +346,7 @@ class GroupItemView extends StatelessWidget {
             width: double.infinity,
             height: 33,
             child: Text(
-              "嘉荣超市",
+              results.name,
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -229,11 +362,12 @@ class GroupItemView extends StatelessWidget {
             child: ListView.separated(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, i) => ChildIteView(datalist[i]),
+                itemBuilder: (context, i) =>
+                    ChildIteView(results.product[i], results.name),
                 separatorBuilder: (context, i) => Divider(
                       height: 1,
                     ),
-                itemCount: datalist.length),
+                itemCount: results.product.length),
           )
         ],
       ),
@@ -242,11 +376,13 @@ class GroupItemView extends StatelessWidget {
 }
 
 class ChildIteView extends StatelessWidget {
-  String item;
+  Product item;
+  String address;
   GlobalKey popuImageKey = GlobalKey(debugLabel: "popuImage");
 
-  ChildIteView(String item) {
+  ChildIteView(Product item, String address) {
     this.item = item;
+    this.address = address;
   }
 
   @override
@@ -264,13 +400,17 @@ class ChildIteView extends StatelessWidget {
               Container(
                 width: 200,
                 height: 100,
-                child: Image.asset("images/simple_ticket.jpg"),
+                child: item.image.length == 0
+                    ? Text("")
+                    : Image.network(item.image[0].imageurl),
               ),
               -70);
         },
         onTap: () {
-          Navigator.push(context,
-              CupertinoPageRoute(builder: (context) => PriceDetailsPage(item)));
+          Navigator.push(
+              context,
+              CupertinoPageRoute(
+                  builder: (context) => PriceDetailsPage(item, address)));
         },
         child: Container(
           width: double.infinity,
@@ -283,7 +423,7 @@ class ChildIteView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                      child: Text(item,
+                      child: Text(item.name,
                           style: TextStyle(color: Colors.black, fontSize: 21)),
                       margin: EdgeInsets.only(top: 10),
                     ),

@@ -39,14 +39,18 @@ dependencies:
   flutter_easyrefresh: ^2.1.1
   cupertino_icons: ^0.1.3
   font_awesome_flutter: ^8.8.1
-#  image_picker: ^0.6.6+1
-  dio: ^3.0.9
+  #  image_picker: ^0.6.6+1
+  http: ^0.12.1
   firebase_admob: ^0.9.3+2
   firebase_storage: ^3.1.5
   firebase_core: ^0.4.4+3
   uuid: 2.0.4
   camera_camera: ^1.0.32+1
   flutter_native_image: ^0.0.5+2
+  device_info: ^0.4.2+4
+  imei_plugin: ^1.1.6
+  connectivity: ^0.4.8+6
+  fluttertoast: ^4.0.1
 
 dev_dependencies:
   flutter_test:

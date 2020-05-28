@@ -1,20 +1,24 @@
+import 'package:check_price/beans/ProductResponeBean.dart';
 import 'package:check_price/pages/ToCorrectPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PriceDetailsPage extends StatefulWidget {
-  String product;
+  String address;
+  Product product;
 
-  PriceDetailsPage(this.product);
+  PriceDetailsPage(this.product, this.address);
 
   @override
-  _PriceDetailsPageState createState() => _PriceDetailsPageState(product);
+  _PriceDetailsPageState createState() =>
+      _PriceDetailsPageState(product, address);
 }
 
 class _PriceDetailsPageState extends State<PriceDetailsPage> {
-  String product;
+  Product product;
+  String address;
 
-  _PriceDetailsPageState(this.product);
+  _PriceDetailsPageState(this.product, this.address);
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +33,17 @@ class _PriceDetailsPageState extends State<PriceDetailsPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          product,
+          product.name,
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         actions: <Widget>[
           FlatButton(
             onPressed: () async {
-              bool isFinish = await Navigator.push(context,
-                  CupertinoPageRoute(builder: (context) => ToCorrectPage()));
+              bool isFinish = await Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => ToCorrectPage(product)));
               if (isFinish) Navigator.pop(context);
             },
             child: Text(
@@ -59,21 +65,21 @@ class _PriceDetailsPageState extends State<PriceDetailsPage> {
                 children: <Widget>[
                   Container(
                     child: Text(
-                      "商店：新苗超市",
+                      "商店：" + address,
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
                     margin: EdgeInsets.only(left: 16, top: 6),
                   ),
                   Container(
                     child: Text(
-                      "時間：2020-05-20 23:48:29",
+                      "時間：" + getFormatStr(product.uploaddate),
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
                     margin: EdgeInsets.only(left: 16, top: 2),
                   ),
                   Container(
                     child: Text(
-                      "價格：\$15.5",
+                      "價格：\$" + product.price,
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
                     margin: EdgeInsets.only(left: 16, top: 2),
@@ -84,11 +90,19 @@ class _PriceDetailsPageState extends State<PriceDetailsPage> {
             ),
             Expanded(
               flex: 1,
-              child: Image.asset("images/simple_ticket.jpg"),
+              child: product.image.length == 0
+                  ? Text("")
+                  : Image.network(product.image[0].imageurl),
             )
           ],
         ),
       ),
     );
+  }
+
+  String getFormatStr(String datetime) {
+    String result = DateTime.parse(product.uploaddate).toString();
+    result = result.substring(0, result.indexOf("."));
+    return result;
   }
 }

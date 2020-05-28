@@ -1,14 +1,19 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:check_price/beans/UploadPermissionResponeBean.dart';
 import 'package:check_price/customWidgets/Camera.dart';
 import 'package:check_price/customWidgets/CameraFocus.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/ThanksPage.dart';
+import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:imei_plugin/imei_plugin.dart';
 import 'package:uuid/uuid.dart';
 
 class UploadPage extends StatefulWidget {
@@ -53,31 +58,61 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   Future<void> _uploadFiles() async {
-    showDialog(
-        context: context, builder: (context) => LoadingDialog("正在上傳收據..."));
-    String uuid = Uuid().v1();
-    for (int i = 0; i < fileList.length; i++) {
-      final StorageReference ref =
-          storage.ref().child('image').child('$uuid=image$i.jpg');
-      final StorageUploadTask uploadTask = ref.putFile(fileList[i]);
-      final StreamSubscription<StorageTaskEvent> streamSubscription =
-          uploadTask.events.listen((event) {
-        print('EVENT ${event.type}');
-        if (uploadTask.isComplete) {
-          print('streamSubscription.uploadTask.isComplete');
-        }
-      });
-      await uploadTask.onComplete;
-      print('uploadTask.isComplete');
-      neekUploadFileSize--;
-      streamSubscription.cancel();
-      if (neekUploadFileSize == 0) {
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.push(
-            context, CupertinoPageRoute(builder: (context) => ThanksPage()));
+    NetworkUtil.isConnected().then((value) async {
+      if (value) {
+        showDialog(
+            context: context, builder: (context) => LoadingDialog("正在上傳收據..."));
+        String platformImei = await ImeiPlugin.getImei(
+            shouldShowRequestPermissionRationale: false);
+        var params = {
+          "deviceime": platformImei,
+        };
+        var body = utf8.encode(json.encode(params));
+        await NetworkUtil.postWithBody("/api/device/permission", body, true,
+            (respone) async {
+          UploadPermissionResponeBean uploadPermissionResponeBean =
+              UploadPermissionResponeBean.fromJson(
+                  jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+          if (uploadPermissionResponeBean.code == 200 &&
+              uploadPermissionResponeBean.result.permission) {
+            String uuid = Uuid().v1();
+            for (int i = 0; i < fileList.length; i++) {
+              final StorageReference ref =
+                  storage.ref().child('public').child('$uuid=image$i.jpg');
+              final StorageUploadTask uploadTask = ref.putFile(fileList[i]);
+              final StreamSubscription<StorageTaskEvent> streamSubscription =
+                  uploadTask.events.listen((event) {
+                print('EVENT ${event.type}');
+                if (uploadTask.isComplete) {
+                  print('streamSubscription.uploadTask.isComplete');
+                }
+              });
+              await uploadTask.onComplete;
+              print('uploadTask.isComplete');
+              neekUploadFileSize--;
+              streamSubscription.cancel();
+              if (neekUploadFileSize == 0) {
+                await NetworkUtil.post("/api/counter", true, (respone){
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    Navigator.push(context,
+                        CupertinoPageRoute(builder: (context) => ThanksPage()));
+                }, (erro){
+                    Fluttertoast.showToast(msg: "上傳失敗，請提意見給我們！");
+                });
+              }
+            }
+          }else{
+            Fluttertoast.showToast(msg: "請提意見給我們！");
+          }
+        }, (erro) {
+          Navigator.pop(context);
+          Fluttertoast.showToast(msg: erro);
+        });
+      } else {
+        Fluttertoast.showToast(msg: "請檢查網絡！");
       }
-    }
+    });
   }
 
   @override

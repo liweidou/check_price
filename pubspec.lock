@@ -57,6 +57,27 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.14.12"
+  connectivity:
+    dependency: "direct main"
+    description:
+      name: connectivity
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.4.8+6"
+  connectivity_macos:
+    dependency: transitive
+    description:
+      name: connectivity_macos
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.0+3"
+  connectivity_platform_interface:
+    dependency: transitive
+    description:
+      name: connectivity_platform_interface
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.6"
   convert:
     dependency: transitive
     description:
@@ -78,13 +99,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.1.3"
-  dio:
+  device_info:
     dependency: "direct main"
     description:
-      name: dio
+      name: device_info
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "3.0.9"
+    version: "0.4.2+4"
   firebase:
     dependency: transitive
     description:
@@ -165,6 +186,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: "direct main"
+    description:
+      name: fluttertoast
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.0.1"
   font_awesome_flutter:
     dependency: "direct main"
     description:
@@ -173,7 +201,7 @@ packages:
     source: hosted
     version: "8.8.1"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       url: "https://pub.flutter-io.cn"
@@ -193,6 +221,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.12"
+  imei_plugin:
+    dependency: "direct main"
+    description:
+      name: imei_plugin
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.6"
   js:
     dependency: transitive
     description:
