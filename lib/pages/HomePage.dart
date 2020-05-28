@@ -70,29 +70,29 @@ class _HomePageState extends State<HomePage>
       ..show(horizontalCenterOffset: 0, anchorOffset: 0);
     initPrefrence();
 
-    if (Global.preferences.getBool(Global.HAS_GUIDE_KEY) == null ||
-        !Global.preferences.getBool(Global.HAS_GUIDE_KEY)) {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        show1();
-      });
-    }
-
     WidgetsBinding.instance.addObserver(this);
 
+
+  }
+
+  void initPrefrence() async {
+    Global.preferences = await SharedPreferences.getInstance();
     NetworkUtil.isConnected().then((value) {
       if (value) {
         showDialog(
             context: context, builder: (context) => LoadingDialog("正在获取权限..."));
         NetworkUtil.doLogin(() {
           Navigator.pop(context);
+          if (Global.preferences.getBool(Global.HAS_GUIDE_KEY) == null ||
+              !Global.preferences.getBool(Global.HAS_GUIDE_KEY)) {
+            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+              show1();
+            });
+          }
           getSumCount();
         });
       }
     });
-  }
-
-  void initPrefrence() async {
-    Global.preferences = await SharedPreferences.getInstance();
   }
 
   void getSumCount() async {

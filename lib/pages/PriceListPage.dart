@@ -94,6 +94,7 @@ class _PriceListPageState extends State<PriceListPage> {
                             setState(() {
                               isTodayResluts = !isTodayResluts;
                             });
+                            onRefreshData();
                           },
                           icon: Icon(
                             Icons.check_box,
@@ -126,6 +127,7 @@ class _PriceListPageState extends State<PriceListPage> {
                                         isSortByTime = true;
                                       });
                                       Navigator.pop(context);
+                                      onRefreshData();
                                     },
                                   ),
                                   SimpleDialogOption(
@@ -138,6 +140,7 @@ class _PriceListPageState extends State<PriceListPage> {
                                         isSortByTime = false;
                                       });
                                       Navigator.pop(context);
+                                      onRefreshData();
                                     },
                                   )
                                 ],
@@ -157,6 +160,7 @@ class _PriceListPageState extends State<PriceListPage> {
                             IconButton(
                               onPressed: () => setState(() {
                                 isAsec = !isAsec;
+                                onRefreshData();
                               }),
                               icon: FaIcon(isAsec
                                   ? FontAwesomeIcons.sortAmountUpAlt
@@ -262,14 +266,14 @@ class _PriceListPageState extends State<PriceListPage> {
     if (isTodayResluts) {
       if (isSortByTime) {
         if (isAsec) {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
               "&new=true" +
               "&ordering=product__uploaddate";
         } else {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
@@ -278,14 +282,14 @@ class _PriceListPageState extends State<PriceListPage> {
         }
       } else {
         if (isAsec) {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
               "&new=true" +
               "&ordering=-product__price";
         } else {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
@@ -296,13 +300,13 @@ class _PriceListPageState extends State<PriceListPage> {
     } else {
       if (isSortByTime) {
         if (isAsec) {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
               "&ordering=product__uploaddate";
         } else {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
@@ -310,13 +314,13 @@ class _PriceListPageState extends State<PriceListPage> {
         }
       } else {
         if (isAsec) {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
               "&ordering=-product__price";
         } else {
-          url = "/product?page=" +
+          url = "/api/product?page=" +
               currentPage.toString() +
               "&search=" +
               productName +
