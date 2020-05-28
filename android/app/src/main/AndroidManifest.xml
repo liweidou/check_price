@@ -9,7 +9,7 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="check_price"
+        android:label="PriceTags"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
