@@ -1,27 +1,19 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:check_price/beans/CounterResponeBean.dart';
-import 'package:check_price/beans/LoginResponeBean.dart';
-import 'package:check_price/beans/RefreshTokenResponeBean.dart';
 import 'package:check_price/customWidgets/Camera.dart';
 import 'package:check_price/customWidgets/FocusRectangle.dart';
-import 'package:check_price/customWidgets/CameraPreviewScanner.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/AdvisePage.dart';
 import 'package:check_price/pages/SearchPage.dart';
 import 'package:check_price/pages/UploadPage.dart';
 import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
-import 'package:device_info/device_info.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_guidance_plugin/flutter_guidance_plugin.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:imei_plugin/imei_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
