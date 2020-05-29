@@ -6,7 +6,8 @@ import 'package:check_price/beans/CounterResponeBean.dart';
 import 'package:check_price/beans/LoginResponeBean.dart';
 import 'package:check_price/beans/RefreshTokenResponeBean.dart';
 import 'package:check_price/customWidgets/Camera.dart';
-import 'package:check_price/customWidgets/CameraFocus.dart';
+import 'package:check_price/customWidgets/FocusRectangle.dart';
+import 'package:check_price/customWidgets/CameraPreviewScanner.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/AdvisePage.dart';
 import 'package:check_price/pages/SearchPage.dart';
@@ -269,10 +270,11 @@ class _HomePageState extends State<HomePage>
     File val = await showDialog(
         context: context,
         builder: (context) => Camera(
-              imageMask: CameraFocus.rectangle(
-                color: Colors.black.withOpacity(0.5),
-              ),
-            ));
+          imageMask: FocusRectangle(
+            color: Colors.black.withOpacity(0.5),
+            isRight: false,
+          ),
+        ));
 
     if (val != null) {
       Navigator.push(

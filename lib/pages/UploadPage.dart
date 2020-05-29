@@ -4,9 +4,10 @@ import 'dart:io';
 
 import 'package:check_price/beans/UploadPermissionResponeBean.dart';
 import 'package:check_price/customWidgets/Camera.dart';
-import 'package:check_price/customWidgets/CameraFocus.dart';
+import 'package:check_price/customWidgets/FocusRectangle.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/ThanksPage.dart';
+import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -26,12 +27,11 @@ class UploadPage extends StatefulWidget {
 }
 
 class _UploadPageState extends State<UploadPage> {
-  List<File> fileList = List();
-  int neekUploadFileSize = 0;
+  File imageFile;
   FirebaseStorage storage;
 
   _UploadPageState(File firstFile) {
-    fileList.add(firstFile);
+    imageFile = firstFile;
   }
 
   @override
@@ -76,33 +76,28 @@ class _UploadPageState extends State<UploadPage> {
           if (uploadPermissionResponeBean.code == 200 &&
               uploadPermissionResponeBean.result.permission) {
             String uuid = Uuid().v1();
-            for (int i = 0; i < fileList.length; i++) {
-              final StorageReference ref =
-                  storage.ref().child('public').child('$uuid=image$i.jpg');
-              final StorageUploadTask uploadTask = ref.putFile(fileList[i]);
-              final StreamSubscription<StorageTaskEvent> streamSubscription =
-                  uploadTask.events.listen((event) {
-                print('EVENT ${event.type}');
-                if (uploadTask.isComplete) {
-                  print('streamSubscription.uploadTask.isComplete');
-                }
-              });
-              await uploadTask.onComplete;
-              print('uploadTask.isComplete');
-              neekUploadFileSize--;
-              streamSubscription.cancel();
-              if (neekUploadFileSize == 0) {
-                await NetworkUtil.post("/api/counter", true, (respone){
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (context) => ThanksPage()));
-                }, (erro){
-                    Fluttertoast.showToast(msg: "上傳失敗，請提意見給我們！");
-                });
+            final StorageReference ref =
+                storage.ref().child('public').child('$uuid.jpg');
+            final StorageUploadTask uploadTask = ref.putFile(imageFile);
+            final StreamSubscription<StorageTaskEvent> streamSubscription =
+                uploadTask.events.listen((event) {
+              print('EVENT ${event.type}');
+              if (uploadTask.isComplete) {
+                print('streamSubscription.uploadTask.isComplete');
               }
-            }
-          }else{
+            });
+            await uploadTask.onComplete;
+            print('uploadTask.isComplete');
+            streamSubscription.cancel();
+            await NetworkUtil.post("/api/counter", true, (respone) {
+              Navigator.pop(context);
+              Navigator.pop(context);
+              Navigator.push(context,
+                  CupertinoPageRoute(builder: (context) => ThanksPage()));
+            }, (erro) {
+              Fluttertoast.showToast(msg: "上傳失敗，請提意見給我們！");
+            });
+          } else {
             Fluttertoast.showToast(msg: "請提意見給我們！");
           }
         }, (erro) {
@@ -126,35 +121,101 @@ class _UploadPageState extends State<UploadPage> {
             onPressed: () => Navigator.pop(context),
           ),
           centerTitle: true,
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                if (imageFile != null) {
+                  if (Global.preferences.getBool(Global.AGREE_USE_KEY) ==
+                          null ||
+                      !Global.preferences.getBool(Global.AGREE_USE_KEY)) {
+                    showCupertinoDialog(
+                        context: context,
+                        builder: (context) {
+                          return new CupertinoAlertDialog(
+                            title: new Text("使用條款"),
+                            content: new Text("内容内容内容内容内容内容内容内容内容内容内容"),
+                            actions: <Widget>[
+                              new FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: new Text(
+                                  "取消",
+                                  style: TextStyle(color: Color(0xff007AFF)),
+                                ),
+                              ),
+                              new FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Global.preferences
+                                      .setBool(Global.AGREE_USE_KEY, true);
+                                  _uploadFiles();
+                                },
+                                child: new Text("同意並上傳",
+                                    style: TextStyle(color: Color(0xff007AFF))),
+                              ),
+                            ],
+                          );
+                        });
+                  } else {
+                    _uploadFiles();
+                  }
+                } else {
+                  Fluttertoast.showToast(msg: "請先拍照");
+                }
+              },
+              child: Text(
+                "上傳",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+            )
+          ],
           title: Text(
             "照片",
             style: TextStyle(color: Colors.white),
           )),
       body: Container(
         width: double.infinity,
-        child: Column(
+        child: Stack(
           children: <Widget>[
-            Expanded(
-              flex: 1,
-              child: GridView.count(
-                //水平子Widget之间间距
-                crossAxisSpacing: 10.0,
-                //垂直子Widget之间间距
-                mainAxisSpacing: 30.0,
-                //GridView内边距
-                padding: EdgeInsets.all(10.0),
-                //一行的Widget数量
-                crossAxisCount: 2,
-                //子Widget宽高比例
-                childAspectRatio: 0.666,
-                //子Widget列表
-                children: getWidgetList(),
-              ),
-            ),
+            imageFile == null
+                ? Text("")
+                : Container(
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height,
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            child: Image.file(
+                              imageFile,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                imageFile = null;
+                              });
+                            },
+                            icon: Icon(Icons.cancel),
+                            color: Colors.black,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
             Container(
               width: 160,
               height: 70,
-              margin: EdgeInsets.only(bottom: 15),
+              margin: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height - 250,
+                  left: MediaQuery.of(context).size.width / 2 - 80),
               child: RaisedButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(35),
@@ -175,86 +236,16 @@ class _UploadPageState extends State<UploadPage> {
                     Container(
                       margin: EdgeInsets.only(left: 8),
                       child: Text(
-                        "繼續",
+                        "重拍",
                         style: TextStyle(color: Colors.white, fontSize: 21),
                       ),
                     )
                   ],
                 ),
               ),
-            ),
-            Container(
-              width: 160,
-              height: 70,
-              margin: EdgeInsets.only(bottom: 95),
-              child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(35),
-                ),
-                onPressed: () {
-                  if (fileList.length != 0) {
-                    neekUploadFileSize = fileList.length;
-                    _uploadFiles();
-                  } else {}
-                },
-                color: Color(0xff0F9D58),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                        margin: EdgeInsets.only(left: 10),
-                        child: Icon(
-                          Icons.cloud_upload,
-                          color: Colors.white,
-                          size: 41,
-                        )),
-                    Container(
-                      margin: EdgeInsets.only(left: 8),
-                      child: Text(
-                        "上傳",
-                        style: TextStyle(color: Colors.white, fontSize: 21),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
+            )
           ],
         ),
-      ),
-    );
-  }
-
-  List<Widget> getWidgetList() {
-    return fileList.map((item) => getItemContainer(item)).toList();
-  }
-
-  Widget getItemContainer(File item) {
-    return Container(
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-            left: 0,
-            right: 0,
-            child: Container(
-              child: Image.file(
-                item,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            child: IconButton(
-              onPressed: () {
-                setState(() {
-                  fileList.remove(item);
-                });
-              },
-              icon: Icon(Icons.cancel),
-              color: Colors.black,
-            ),
-          )
-        ],
       ),
     );
   }
@@ -263,8 +254,9 @@ class _UploadPageState extends State<UploadPage> {
     File val = await showDialog(
         context: context,
         builder: (context) => Camera(
-              imageMask: CameraFocus.rectangle(
+              imageMask: FocusRectangle(
                 color: Colors.black.withOpacity(0.5),
+                isRight: false,
               ),
             ));
 
@@ -272,7 +264,7 @@ class _UploadPageState extends State<UploadPage> {
 //      if (fileList.length == 0) Navigator.pop(context);
     } else {
       setState(() {
-        fileList.add(val);
+        imageFile = val;
       });
     }
   }

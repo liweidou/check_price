@@ -1,13 +1,17 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:camera_camera/page/bloc/bloc_camera.dart';
 import 'package:camera_camera/shared/widgets/orientation_icon.dart';
 import 'package:camera_camera/shared/widgets/rotate_icon.dart';
+import 'package:check_price/customWidgets/FocusRectangle.dart';
+import 'package:check_price/customWidgets/bloc_camera.dart';
+import 'package:check_price/customWidgets/scanner_utils.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 
@@ -15,7 +19,7 @@ enum CameraOrientation { landscape, portrait, all }
 enum CameraMode { fullscreen, normal }
 
 class Camera extends StatefulWidget {
-  final Widget imageMask;
+  final FocusRectangle imageMask;
   final CameraMode mode;
   final Widget warning;
   final CameraOrientation orientationEnablePhoto;
@@ -34,7 +38,7 @@ class Camera extends StatefulWidget {
   _CameraState createState() => _CameraState();
 }
 
-class _CameraState extends State<Camera> {
+class _CameraState extends State<Camera> with WidgetsBindingObserver {
   var bloc = BlocCamera();
   var previewH;
   var previewW;
@@ -42,12 +46,18 @@ class _CameraState extends State<Camera> {
   var previewRatio;
   Size tmp;
   Size sizeImage;
+  bool isRight = false;
+
+  List<ImageLabel> labels;
+  bool _isDetecting = false;
+  CameraLensDirection _direction = CameraLensDirection.back;
+
+  final ImageLabeler _imageLabeler = FirebaseVision.instance.imageLabeler();
 
   @override
   void initState() {
     super.initState();
-    bloc.getCameras();
-    bloc.cameras.listen((data) {
+    bloc.getCameras((data) {
       bloc.controllCamera = CameraController(
         data[0],
         ResolutionPreset.high,
@@ -55,6 +65,7 @@ class _CameraState extends State<Camera> {
       bloc.cameraOn.sink.add(0);
       bloc.controllCamera.initialize().then((_) {
         bloc.selectCamera.sink.add(true);
+        initMlKit();
       });
     });
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -64,9 +75,45 @@ class _CameraState extends State<Camera> {
     ]);
   }
 
+  void initMlKit() async {
+    print("initMlKit:");
+    if (bloc.controllCamera == null) print("bloc.controllCamera == null");
+    bloc.controllCamera.startImageStream((CameraImage image) async {
+      if (_isDetecting) return;
+      _isDetecting = true;
+      CameraDescription description = await ScannerUtils.getCamera(_direction);
+      ScannerUtils.detect(
+        image: image,
+        detectInImage: _imageLabeler.processImage,
+        imageRotation: description.sensorOrientation,
+      ).then(
+        (dynamic results) {
+          setState(() {
+            labels = results;
+            bool ir = false;
+            for (ImageLabel label in labels) {
+              if (label.text == "Receipt" ||
+                  label.text == "Paper" ||
+                  label.text == "receipt") {
+                ir = true;
+              }
+              print("label.text:" + label.text);
+            }
+            isRight = ir;
+            widget.imageMask.setIsRight(isRight);
+            print("isright:" + isRight.toString());
+          });
+        },
+      ).whenComplete(() => _isDetecting = false);
+    });
+  }
+
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    bloc.controllCamera.dispose().then((_) {
+      _imageLabeler.close();
+    });
     super.dispose();
     bloc.dispose();
   }
@@ -91,8 +138,15 @@ class _CameraState extends State<Camera> {
                   size: 80,
                 ),
                 onPressed: () {
-                  sizeImage = MediaQuery.of(context).size;
-                  bloc.onTakePictureButtonPressed();
+                  if(isRight) {
+                    sizeImage = MediaQuery
+                        .of(context)
+                        .size;
+                    bloc.onTakePictureButtonPressed();
+                    bloc.onTakePictureButtonPressed();
+                  }else{
+                    Fluttertoast.showToast(msg: "請拍收據");
+                  }
                 },
               ),
             );
@@ -143,19 +197,14 @@ class _CameraState extends State<Camera> {
                       stream: bloc.imagePath.stream,
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
-                          return
-                            Stack(
+                          return Stack(
                             children: <Widget>[
                               OverflowBox(
                                 maxHeight: size.height,
-                                maxWidth: size.height *
-                                    previewRatio,
+                                maxWidth: size.height * previewRatio,
                                 child: Image.file(snapshot.data),
                               ),
-                              if (widget.imageMask != null)
-                                Center(
-                                  child: widget.imageMask,
-                                ),
+
                             ],
                           );
                         } else {
@@ -206,7 +255,7 @@ class _CameraState extends State<Camera> {
                 ),
                 if (widget.mode == CameraMode.fullscreen)
                   Container(
-                    margin: EdgeInsets.only(top: height - height /4.5),
+                    margin: EdgeInsets.only(top: height - height / 4.5),
                     child: StreamBuilder<Object>(
                         stream: bloc.imagePath.stream,
                         builder: (context, snapshot) {
@@ -223,7 +272,7 @@ class _CameraState extends State<Camera> {
                                               color: Colors.white),
                                         ),
                                         onPressed: () {
-                                          bloc.deletePhoto();
+                                          bloc.deletePhoto(() => initMlKit());
                                         },
                                       ),
                                       backgroundColor: Colors.black38,
@@ -237,19 +286,27 @@ class _CameraState extends State<Camera> {
                                               color: Colors.white),
                                         ),
                                         onPressed: () async {
-                                          File compressedFile = await FlutterNativeImage.compressImage(bloc.imagePath.value.path,
-                                              quality: 100,targetWidth: width.toInt(),targetHeight: height.toInt());
+                                          File compressedFile =
+                                              await FlutterNativeImage
+                                                  .compressImage(
+                                                      bloc.imagePath.value.path,
+                                                      quality: 100,
+                                                      targetWidth:
+                                                          width.toInt(),
+                                                      targetHeight:
+                                                          height.toInt());
                                           File croppedFile =
-                                          await FlutterNativeImage
-                                              .cropImage(
-                                              compressedFile.path,
-                                              (width / 16).toInt(),
-                                              (height / 24).toInt(),
-                                              (width - width / 16).toInt(),
-                                              (height - height / 3.5).toInt());
+                                              await FlutterNativeImage
+                                                  .cropImage(
+                                                      compressedFile.path,
+                                                      (width / 16).toInt(),
+                                                      (height / 24).toInt(),
+                                                      (width - width / 16)
+                                                          .toInt(),
+                                                      (height - height / 3.5)
+                                                          .toInt());
                                           if (widget.onFile == null)
-                                            Navigator.pop(
-                                                context, croppedFile);
+                                            Navigator.pop(context, croppedFile);
                                           else {
                                             widget.onFile(croppedFile);
                                           }
@@ -290,9 +347,15 @@ class _CameraState extends State<Camera> {
                                           size: 76,
                                         ),
                                         onPressed: () {
-                                          sizeImage =
-                                              MediaQuery.of(context).size;
-                                          bloc.onTakePictureButtonPressed();
+                                          if(isRight) {
+                                            sizeImage = MediaQuery
+                                                .of(context)
+                                                .size;
+                                            bloc.onTakePictureButtonPressed();
+                                            bloc.onTakePictureButtonPressed();
+                                          }else{
+                                            Fluttertoast.showToast(msg: "請拍收據");
+                                          }
                                         },
                                       ),
                                     ),
@@ -334,7 +397,7 @@ class _CameraState extends State<Camera> {
                                               color: Colors.white),
                                         ),
                                         onPressed: () {
-                                          bloc.deletePhoto();
+                                          bloc.deletePhoto(() => initMlKit());
                                         },
                                       ),
                                       backgroundColor: Colors.black38,
