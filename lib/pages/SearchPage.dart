@@ -7,8 +7,18 @@ class SearchPage extends StatefulWidget {
   _SearchPageState createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPageState extends State<SearchPage> with WidgetsBindingObserver {
   TextEditingController nameCtr = TextEditingController();
+  FocusNode focusNode = FocusNode(debugLabel: "input");
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      FocusScope.of(context).requestFocus(focusNode);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,33 +48,41 @@ class _SearchPageState extends State<SearchPage> {
                 children: <Widget>[
                   Container(
                     child: TextField(
+                      onChanged: (str) {
+                        setState(() {});
+                      },
+                      focusNode: focusNode,
                       textAlignVertical: TextAlignVertical.center,
                       controller: nameCtr,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.only(left: 21, right: 21),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              nameCtr.text = "";
-                            });
-                          },
-                          icon: Icon(
-                            Icons.cancel,
-                            color: Colors.grey,
-                            size: 20,
-                          ),
-                        ),
-                        hintText: "搜尋產品名稱",
+                        suffixIcon: nameCtr.text.isEmpty
+                            ? Text("")
+                            : IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    nameCtr.text = "";
+                                  });
+                                },
+                                icon: Icon(
+                                  Icons.cancel,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                              ),
+                        hintText: "請輸入產品名稱",
                         hintStyle:
-                        TextStyle(fontSize: 17, color: Color(0xffA6A2BA)),
+                            TextStyle(fontSize: 17, color: Color(0xffA6A2BA)),
                         enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.only(topLeft: Radius
-                                .circular(25), bottomLeft: Radius.circular(25)),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(25),
+                                bottomLeft: Radius.circular(25)),
                             borderSide: BorderSide(color: Color(0xff979797))),
                         focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.only(topLeft: Radius
-                                .circular(25), bottomLeft: Radius.circular(25)),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(25),
+                                bottomLeft: Radius.circular(25)),
                             borderSide: BorderSide(color: Color(0xffF4B400))),
                       ),
                     ),
@@ -80,16 +98,15 @@ class _SearchPageState extends State<SearchPage> {
                         color: Color(0xff568AFF),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(topRight: Radius
-                                .circular(27), bottomRight: Radius.circular(27))
-                        ),
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(27),
+                                bottomRight: Radius.circular(27))),
                         onPressed: () {
                           if (!nameCtr.text.isEmpty) {
                             Navigator.push(
                                 context,
                                 CupertinoPageRoute(
-                                    builder: (context) =>
-                                        PriceListPage(
+                                    builder: (context) => PriceListPage(
                                           productName: nameCtr.text.toString(),
                                         )));
                           }

@@ -1,20 +1,27 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:check_price/beans/CounterResponeBean.dart';
+import 'package:check_price/beans/UploadPermissionResponeBean.dart';
 import 'package:check_price/customWidgets/Camera.dart';
 import 'package:check_price/customWidgets/FocusRectangle.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/AdvisePage.dart';
 import 'package:check_price/pages/SearchPage.dart';
-import 'package:check_price/pages/UploadPage.dart';
+import 'package:check_price/pages/ThanksPage.dart';
 import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_guidance_plugin/flutter_guidance_plugin.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:imei_plugin/imei_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -37,6 +44,8 @@ class _HomePageState extends State<HomePage>
 
   int count = 0;
 
+  FirebaseStorage storage;
+
   BannerAd createBannerAd() {
     return BannerAd(
       adUnitId: BannerAd.testAdUnitId,
@@ -46,6 +55,74 @@ class _HomePageState extends State<HomePage>
         print("BannerAd event $event");
       },
     );
+  }
+
+  void initFireBase() async {
+    final FirebaseApp app = await FirebaseApp.configure(
+      name: 'test',
+      options: FirebaseOptions(
+        googleAppID: (Platform.isIOS || Platform.isMacOS)
+            ? '1:336897268673:ios:7fa150b8347f588bafed40'
+            : '1:336897268673:android:715255b687b9ef5bafed40',
+        gcmSenderID: '336897268673',
+        apiKey: 'AIzaSyC3tNQN4KPOr3rD2annr2a_iagwOPR7kQw',
+        projectID: 'pricetags-277703',
+      ),
+    );
+    storage = FirebaseStorage(
+        app: app, storageBucket: 'gs://pricetags-277703.appspot.com');
+  }
+
+  Future<void> _uploadFiles(File imageFile) async {
+    NetworkUtil.isConnected().then((value) async {
+      if (value) {
+        showDialog(
+            context: context, builder: (context) => LoadingDialog("正在上傳收據..."));
+        String platformImei = await ImeiPlugin.getImei(
+            shouldShowRequestPermissionRationale: false);
+        var params = {
+          "deviceime": platformImei,
+        };
+        var body = utf8.encode(json.encode(params));
+        await NetworkUtil.postWithBody("/api/device/permission", body, true,
+                (respone) async {
+              UploadPermissionResponeBean uploadPermissionResponeBean =
+              UploadPermissionResponeBean.fromJson(
+                  jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+              if (uploadPermissionResponeBean.code == 200 &&
+                  uploadPermissionResponeBean.result.permission) {
+                String uuid = Uuid().v1();
+                final StorageReference ref =
+                storage.ref().child('public').child('$uuid.jpg');
+                final StorageUploadTask uploadTask = ref.putFile(imageFile);
+                final StreamSubscription<StorageTaskEvent> streamSubscription =
+                uploadTask.events.listen((event) {
+                  print('EVENT ${event.type}');
+                  if (uploadTask.isComplete) {
+                    print('streamSubscription.uploadTask.isComplete');
+                  }
+                });
+                await uploadTask.onComplete;
+                print('uploadTask.isComplete');
+                streamSubscription.cancel();
+                await NetworkUtil.post("/api/counter", true, (respone) {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      CupertinoPageRoute(builder: (context) => ThanksPage()));
+                }, (erro) {
+                  Fluttertoast.showToast(msg: "上傳失敗，請提意見給我們！");
+                });
+              } else {
+                Fluttertoast.showToast(msg: "請提意見給我們！");
+              }
+            }, (erro) {
+              Navigator.pop(context);
+              Fluttertoast.showToast(msg: erro);
+            });
+      } else {
+        Fluttertoast.showToast(msg: "請檢查網絡！");
+      }
+    });
   }
 
   @override
@@ -65,7 +142,7 @@ class _HomePageState extends State<HomePage>
 
     WidgetsBinding.instance.addObserver(this);
 
-
+    initFireBase();
   }
 
   void initPrefrence() async {
@@ -263,13 +340,12 @@ class _HomePageState extends State<HomePage>
         context: context,
         builder: (context) => Camera(
           imageMask: FocusRectangle(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withOpacity(0),
           ),
         ));
 
     if (val != null) {
-      Navigator.push(
-          context, CupertinoPageRoute(builder: (context) => UploadPage(val)));
+      _uploadFiles(val);
     }
   }
 

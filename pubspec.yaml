@@ -51,7 +51,7 @@ dependencies:
   imei_plugin: ^1.1.6
   connectivity: ^0.4.8+6
   fluttertoast: ^4.0.1
-  firebase_ml_vision: ^0.9.4
+  sentry: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
   flutter_test:

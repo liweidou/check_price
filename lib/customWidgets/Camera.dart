@@ -5,15 +5,11 @@ import 'package:camera_camera/shared/widgets/orientation_icon.dart';
 import 'package:camera_camera/shared/widgets/rotate_icon.dart';
 import 'package:check_price/customWidgets/FocusRectangle.dart';
 import 'package:check_price/customWidgets/bloc_camera.dart';
-import 'package:check_price/customWidgets/scanner_utils.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
 
 enum CameraOrientation { landscape, portrait, all }
 enum CameraMode { fullscreen, normal }
@@ -46,13 +42,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
   var previewRatio;
   Size tmp;
   Size sizeImage;
-  bool isRight = false;
-
-  List<ImageLabel> labels;
-  bool _isDetecting = false;
-  CameraLensDirection _direction = CameraLensDirection.back;
-
-  final ImageLabeler _imageLabeler = FirebaseVision.instance.imageLabeler();
 
   @override
   void initState() {
@@ -65,7 +54,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
       bloc.cameraOn.sink.add(0);
       bloc.controllCamera.initialize().then((_) {
         bloc.selectCamera.sink.add(true);
-        initMlKit();
       });
     });
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -73,46 +61,12 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
-  }
 
-  void initMlKit() async {
-    print("initMlKit:");
-    if (bloc.controllCamera == null) print("bloc.controllCamera == null");
-    bloc.controllCamera.startImageStream((CameraImage image) async {
-      if (_isDetecting) return;
-      _isDetecting = true;
-      CameraDescription description = await ScannerUtils.getCamera(_direction);
-      ScannerUtils.detect(
-        image: image,
-        detectInImage: _imageLabeler.processImage,
-        imageRotation: description.sensorOrientation,
-      ).then(
-        (dynamic results) {
-          setState(() {
-            labels = results;
-            bool ir = false;
-            for (ImageLabel label in labels) {
-              if (label.text == "Receipt" ||
-                  label.text == "Paper" ||
-                  label.text == "receipt") {
-                ir = true;
-              }
-              print("label.text:" + label.text);
-            }
-            isRight = ir;
-            print("isright:" + isRight.toString());
-          });
-        },
-      ).whenComplete(() => _isDetecting = false);
-    });
   }
 
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-    bloc.controllCamera.dispose().then((_) {
-      _imageLabeler.close();
-    });
     super.dispose();
     bloc.dispose();
   }
@@ -132,11 +86,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
         _buttonPhoto() => Container(
               width: 82,
               height: 82,
-              decoration: BoxDecoration(
-                  border: Border.all(
-                      color: isRight ? Colors.green : Colors.red,
-                      width: 2,
-                      style: BorderStyle.solid)),
               child: IconButton(
                 icon: Icon(
                   CupertinoIcons.circle_filled,
@@ -144,13 +93,8 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                   size: 80,
                 ),
                 onPressed: () {
-                  if (isRight) {
-                    sizeImage = MediaQuery.of(context).size;
-                    bloc.onTakePictureButtonPressed();
-                    bloc.onTakePictureButtonPressed();
-                  } else {
-                    Fluttertoast.showToast(msg: "請拍收據");
-                  }
+                  sizeImage = MediaQuery.of(context).size;
+                  bloc.onTakePictureButtonPressed();
                 },
               ),
             );
@@ -275,7 +219,7 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                               color: Colors.white),
                                         ),
                                         onPressed: () {
-                                          bloc.deletePhoto(() => initMlKit());
+                                          bloc.deletePhoto();
                                         },
                                       ),
                                       backgroundColor: Colors.black38,
@@ -289,29 +233,10 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                               color: Colors.white),
                                         ),
                                         onPressed: () async {
-                                          File compressedFile =
-                                              await FlutterNativeImage
-                                                  .compressImage(
-                                                      bloc.imagePath.value.path,
-                                                      quality: 100,
-                                                      targetWidth:
-                                                          width.toInt(),
-                                                      targetHeight:
-                                                          height.toInt());
-                                          File croppedFile =
-                                              await FlutterNativeImage
-                                                  .cropImage(
-                                                      compressedFile.path,
-                                                      (width / 16).toInt(),
-                                                      (height / 24).toInt(),
-                                                      (width - width / 16)
-                                                          .toInt(),
-                                                      (height - height / 3.5)
-                                                          .toInt());
                                           if (widget.onFile == null)
-                                            Navigator.pop(context, croppedFile);
+                                            Navigator.pop(context, bloc.imagePath.value);
                                           else {
-                                            widget.onFile(croppedFile);
+                                            widget.onFile(bloc.imagePath.value);
                                           }
                                         },
                                       ),
@@ -343,15 +268,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                     Container(
                                       width: 72,
                                       height: 72,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: isRight
-                                                  ? Colors.green
-                                                  : Colors.red,
-                                              width: 2,
-                                              style: BorderStyle.solid),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(37))),
                                       child: Align(
                                         alignment: FractionalOffset(0.08, -0.5),
                                         child: IconButton(
@@ -361,15 +277,9 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                             size: 80,
                                           ),
                                           onPressed: () {
-                                            if(isRight) {
-                                              sizeImage = MediaQuery
-                                                  .of(context)
-                                                  .size;
-                                              bloc.onTakePictureButtonPressed();
-                                              bloc.onTakePictureButtonPressed();
-                                            }else{
-                                              Fluttertoast.showToast(msg: "請拍收據");
-                                            }
+                                            sizeImage =
+                                                MediaQuery.of(context).size;
+                                            bloc.onTakePictureButtonPressed();
                                           },
                                           padding: EdgeInsets.all(0),
                                         ),
@@ -413,7 +323,7 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                               color: Colors.white),
                                         ),
                                         onPressed: () {
-                                          bloc.deletePhoto(() => initMlKit());
+                                          bloc.deletePhoto();
                                         },
                                       ),
                                       backgroundColor: Colors.black38,

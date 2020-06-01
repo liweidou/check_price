@@ -48,7 +48,6 @@ class BlocCamera {
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
   void onTakePictureButtonPressed() {
-    controllCamera.stopImageStream();
     takePicture().then((String filePath) {
       imagePath.sink.add(File(filePath));
     });
@@ -88,11 +87,10 @@ class BlocCamera {
     }
   }
 
-  void deletePhoto(Function afterDelete) {
+  void deletePhoto() {
     var dir = new Directory(imagePath.value.path);
     dir.deleteSync(recursive: true);
     imagePath.sink.add(null);
-    afterDelete();
   }
 
   void dispose() {

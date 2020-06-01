@@ -14,14 +14,12 @@ class FocusRectangle extends StatefulWidget {
     );
     return focusRectangleState;
   }
-
 }
 
 class FocusRectangleState extends State<FocusRectangle> {
   Color color;
 
   FocusRectangleState({Key key, this.color});
-
 
   @override
   Widget build(BuildContext context) {
@@ -40,22 +38,27 @@ class FocusRectangleState extends State<FocusRectangle> {
             margin: EdgeInsets.only(
                 left: MediaQuery.of(context).size.width / 10,
                 right: MediaQuery.of(context).size.width / 10,
-                top: MediaQuery.of(context).size.height / 24),
+                top: MediaQuery.of(context).size.height / 16),
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 14,
+            height: MediaQuery.of(context).size.height / 12,
             child: Text(""),
-            decoration: BoxDecoration(
-                border: Border.all(
-                    color: Colors.white, width: 2)),
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                blurRadius: 2, //阴影范
+                color: Color(0x0000000),
+                offset: Offset(1, 1),
+              ),
+            ], border: Border.all(color: Colors.white, width: 2),
+            ),
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height / 9 + 5,
+            top: MediaQuery.of(context).size.height / 7 + 5,
             left: MediaQuery.of(context).size.width / 2 - 110,
             child: Container(
               width: 220,
               child: Text(
                 "收據商標一定要放在框線內",
-                style: TextStyle(color: Colors.white,fontSize: 18),
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
           )
@@ -99,43 +102,6 @@ class _RectangleModePhoto extends CustomClipper<Path> {
   double getIntDoubleValue(double originDouble) {
     int a = originDouble.toInt();
     return a.toDouble();
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return true;
-  }
-}
-
-class _FocusCircle extends StatelessWidget {
-  final Color color;
-
-  const _FocusCircle({Key key, this.color}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: ClipPath(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          color: color,
-        ),
-        clipper: _CircleModePhoto(),
-      ),
-    );
-  }
-}
-
-class _CircleModePhoto extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    return new Path()
-      ..addOval(new Rect.fromCircle(
-          center: new Offset(size.width / 2, size.height / 2),
-          radius: size.width * 0.4))
-      ..addRect(new Rect.fromLTWH(0.0, 0.0, size.width, size.height))
-      ..fillType = PathFillType.evenOdd;
   }
 
   @override

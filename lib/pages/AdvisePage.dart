@@ -7,17 +7,28 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class AdvisePage extends StatefulWidget {
+class AdvisePage extends StatefulWidget with WidgetsBindingObserver{
   @override
   _AdvisePageState createState() => _AdvisePageState();
 }
 
 class _AdvisePageState extends State<AdvisePage> {
   TextEditingController contentCtr = TextEditingController();
+  FocusNode focusNode = FocusNode(debugLabel: "input");
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      FocusScope.of(context).requestFocus(focusNode);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         automaticallyImplyLeading: true,
         centerTitle: true,
@@ -46,13 +57,17 @@ class _AdvisePageState extends State<AdvisePage> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 13),
+              margin: EdgeInsets.only(top: 13,bottom: 13),
               color: Colors.white,
               child: TextField(
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                focusNode: focusNode,
+                autofocus: true,
                 controller: contentCtr,
                 decoration: InputDecoration(
                   hintText: "内容",
-                  contentPadding: EdgeInsets.only(left: 16),
+                  contentPadding: EdgeInsets.only(left: 16,bottom: 16,top: 16),
                   focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.transparent)),
                   enabledBorder: UnderlineInputBorder(

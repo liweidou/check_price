@@ -10,12 +10,15 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:imei_plugin/imei_plugin.dart';
+import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Global.dart';
 
 class NetworkUtil {
 //  response.bodyBytes
+
+  static SentryClient sentry = new SentryClient(dsn: "__PUBLIC_KEY__");
 
   static Future<bool> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -53,6 +56,10 @@ class NetworkUtil {
     } else {
       onFailed(response.reasonPhrase);
       print("erro:" + response.reasonPhrase);
+      await sentry.captureException(
+        exception: response.statusCode,
+        stackTrace: response.reasonPhrase,
+      );
     }
   }
 
@@ -81,6 +88,10 @@ class NetworkUtil {
     } else {
       onFailed(response.reasonPhrase);
       print("erro:" + response.reasonPhrase);
+      await sentry.captureException(
+        exception: response.statusCode,
+        stackTrace: response.reasonPhrase,
+      );
     }
   }
 
@@ -105,6 +116,10 @@ class NetworkUtil {
       onFailed(response.reasonPhrase);
       print("responseerro:" + response.body);
       print("erro:" + response.reasonPhrase);
+      await sentry.captureException(
+        exception: response.statusCode,
+        stackTrace: response.reasonPhrase,
+      );
     }
   }
 
@@ -120,8 +135,13 @@ class NetworkUtil {
         response.statusCode >= 200 &&
         response.statusCode < 300)
       onSuccess(response);
-    else
+    else {
       onFailed(response.reasonPhrase);
+      await sentry.captureException(
+        exception: response.statusCode,
+        stackTrace: response.reasonPhrase,
+      );
+    }
   }
 
   static Future put(
@@ -136,8 +156,13 @@ class NetworkUtil {
         response.statusCode >= 200 &&
         response.statusCode < 300)
       onSuccess(response);
-    else
+    else {
       onFailed(response.reasonPhrase);
+      await sentry.captureException(
+        exception: response.statusCode,
+        stackTrace: response.reasonPhrase,
+      );
+    }
   }
 
   static Future putWithParams(String url, Map<String, Object> params,
@@ -153,8 +178,13 @@ class NetworkUtil {
         response.statusCode >= 200 &&
         response.statusCode < 300)
       onSuccess(response);
-    else
+    else{
       onFailed(response.reasonPhrase);
+      await sentry.captureException(
+        exception: response.statusCode,
+        stackTrace: response.reasonPhrase,
+      );
+    }
   }
 
   static void doLogin(Function afterSetToken) async {
