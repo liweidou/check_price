@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:camera_camera/page/bloc/bloc_camera.dart';
 import 'package:camera_camera/shared/widgets/orientation_icon.dart';
 import 'package:camera_camera/shared/widgets/rotate_icon.dart';
 import 'package:check_price/customWidgets/FocusRectangle.dart';
-import 'package:check_price/customWidgets/bloc_camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,7 +46,8 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    bloc.getCameras((data) {
+    bloc.getCameras();
+    bloc.cameras.listen((data) {
       bloc.controllCamera = CameraController(
         data[0],
         ResolutionPreset.high,

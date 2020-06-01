@@ -433,6 +433,8 @@ class _HomePageState extends State<HomePage>
                 ],
               );
             });
+      }else{
+        _uploadFiles(val);
       }
     }
   }
