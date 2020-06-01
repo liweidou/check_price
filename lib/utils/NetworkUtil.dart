@@ -4,8 +4,10 @@ import 'dart:io';
 
 import 'package:check_price/beans/LoginResponeBean.dart';
 import 'package:check_price/beans/RefreshTokenResponeBean.dart';
+import 'package:check_price/utils/CommonUtils.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:device_info/device_info.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -187,7 +189,7 @@ class NetworkUtil {
     }
   }
 
-  static void doLogin(Function afterSetToken) async {
+  static void doLogin(BuildContext context,Function afterSetToken) async {
     NetworkUtil.isConnected().then((value) async {
       if (value) {
         String refreshTokenValue =
@@ -207,7 +209,7 @@ class NetworkUtil {
                 .setString(Global.REFRESH_TOKEN_KEY, loginResponeBean.refresh);
             registerDevice();
             afterSetToken();
-            cycleRefreshToken();
+            cycleRefreshToken(context);
           }, (erro) {});
         } else {
           var params = {"refresh": refreshTokenValue};
@@ -221,22 +223,22 @@ class NetworkUtil {
                 Global.TOKEN_PREFIX + " " + loginResponeBean.access;
             registerDevice();
             afterSetToken();
-            cycleRefreshToken();
+            cycleRefreshToken(context);
           }, (erro) {
             Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
-            doLogin(afterSetToken);
+            doLogin(context,afterSetToken);
           });
         }
       } else {
-        Fluttertoast.showToast(msg: "請檢查網絡！");
+        CommonUtils.showToast(context,"請檢查網絡！");
       }
     });
   }
 
-  static void cycleRefreshToken(){
+  static void cycleRefreshToken(BuildContext context){
     Global.timer?.cancel();
     Global.timer = Timer.periodic(Duration(minutes: 5), (timer) {
-      NetworkUtil.doLogin(() {});
+      NetworkUtil.doLogin(context,() {});
     });
   }
 

@@ -10,6 +10,7 @@ import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/AdvisePage.dart';
 import 'package:check_price/pages/SearchPage.dart';
 import 'package:check_price/pages/ThanksPage.dart';
+import 'package:check_price/utils/CommonUtils.dart';
 import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:firebase_admob/firebase_admob.dart';
@@ -110,17 +111,17 @@ class _HomePageState extends State<HomePage>
                   Navigator.push(context,
                       CupertinoPageRoute(builder: (context) => ThanksPage()));
                 }, (erro) {
-                  Fluttertoast.showToast(msg: "上傳失敗，請提意見給我們！");
+                  CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
                 });
               } else {
-                Fluttertoast.showToast(msg: "請提意見給我們！");
+                CommonUtils.showToast(context, "請提意見給我們！");
               }
             }, (erro) {
               Navigator.pop(context);
               Fluttertoast.showToast(msg: erro);
             });
       } else {
-        Fluttertoast.showToast(msg: "請檢查網絡！");
+        CommonUtils.showToast(context, "請檢查網絡！");
       }
     });
   }
@@ -133,7 +134,8 @@ class _HomePageState extends State<HomePage>
         appId: Platform.isAndroid
             ? 'ca-app-pub-5426843524329045~3274164592'
             : 'ca-app-pub-5426843524329045~5102800320');
-    _bannerAd = createBannerAd()..load();
+    _bannerAd = createBannerAd()
+      ..load();
     _bannerAd ??= createBannerAd();
     _bannerAd
       ..load()
@@ -145,18 +147,58 @@ class _HomePageState extends State<HomePage>
     initFireBase();
   }
 
+  randomTestData() {
+    List<CurvePoint> curvePointList = [];
+
+    ///创建指引
+    CurvePoint curvePoint = CurvePoint(0, 0);
+    curvePoint.x = double.parse("0.5");
+    curvePoint.y = double.parse(
+        (0.5 + (3 / MediaQuery
+            .of(context)
+            .size
+            .height)).toString());
+    curvePoint.tipsMessage = "点击这里进入搜索商品价格页面！";
+    curvePoint.nextString = "下一步";
+    curvePointList.add(curvePoint);
+
+    CurvePoint curvePoint1 = CurvePoint(0, 0);
+    curvePoint1.x = double.parse("0.5");
+    curvePoint1.y = double.parse(
+        (0.5 + (87 / MediaQuery
+            .of(context)
+            .size
+            .height)).toString());
+    curvePoint1.tipsMessage = "点击这里进入搜索商品价格页面！";
+    curvePoint1.nextString = "完成";
+    curvePointList.add(curvePoint1);
+    return curvePointList;
+  }
+
   void initPrefrence() async {
     Global.preferences = await SharedPreferences.getInstance();
     NetworkUtil.isConnected().then((value) {
       if (value) {
         showDialog(
             context: context, builder: (context) => LoadingDialog("正在获取权限..."));
-        NetworkUtil.doLogin(() {
+        NetworkUtil.doLogin(context, () {
           Navigator.pop(context);
           if (Global.preferences.getBool(Global.HAS_GUIDE_KEY) == null ||
               !Global.preferences.getBool(Global.HAS_GUIDE_KEY)) {
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-              show1();
+              List<CurvePoint> curvePointList = randomTestData();
+              showBeginnerGuidance(context,
+                  curvePointList: curvePointList,
+                  pointX: 0,
+                  pointY: 0,
+                  isSlide: true,
+                  logs: true,
+                  nextBackgroundColor: Color(0xff568AFF),
+                  clickCallback: (isEnd) {
+                    if (isEnd) {
+                      Global.preferences.setBool(Global.HAS_GUIDE_KEY, true);
+                    }
+                  });
             });
           }
           getSumCount();
@@ -170,10 +212,10 @@ class _HomePageState extends State<HomePage>
       CounterResponeBean counterResponeBean = CounterResponeBean.fromJson(
           jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
       AnimationController animationController =
-          AnimationController(vsync: this, duration: Duration(seconds: 2));
+      AnimationController(vsync: this, duration: Duration(seconds: 2));
       Animation<int> animation =
-          IntTween(begin: 0, end: counterResponeBean.result)
-              .animate(animationController);
+      IntTween(begin: 0, end: counterResponeBean.result)
+          .animate(animationController);
       animationController.addListener(() {
         setState(() {
           count = animation.value;
@@ -258,8 +300,9 @@ class _HomePageState extends State<HomePage>
                   borderRadius: BorderRadius.circular(35),
                 ),
                 onPressed: () {
-                  Navigator.push(context,
-                      CupertinoPageRoute(builder: (context) => SearchPage()));
+                  CommonUtils.showToast(context, "請檢查網絡！");
+//                  Navigator.push(context,
+//                      CupertinoPageRoute(builder: (context) => SearchPage()));
                 },
                 color: Color(0xff568AFF),
                 child: Row(
@@ -321,8 +364,9 @@ class _HomePageState extends State<HomePage>
                   "意見回饋",
                   style: TextStyle(color: Color(0xff4A4A4A), fontSize: 14),
                 ),
-                onPressed: () => Navigator.push(context,
-                    CupertinoPageRoute(builder: (context) => AdvisePage())),
+                onPressed: () =>
+                    Navigator.push(context,
+                        CupertinoPageRoute(builder: (context) => AdvisePage())),
               ),
             ),
             Expanded(
@@ -338,52 +382,47 @@ class _HomePageState extends State<HomePage>
   void takePhoto() async {
     File val = await showDialog(
         context: context,
-        builder: (context) => Camera(
-          imageMask: FocusRectangle(
-            color: Colors.black.withOpacity(0),
-          ),
-        ));
+        builder: (context) =>
+            Camera(
+              imageMask: FocusRectangle(
+                color: Colors.black.withOpacity(0),
+              ),
+            ));
 
     if (val != null) {
-      _uploadFiles(val);
-    }
-  }
-
-  randomTestData() {
-    List<CurvePoint> curvePointList = [];
-
-    ///创建指引
-    CurvePoint curvePoint = CurvePoint(0, 0);
-    curvePoint.x = double.parse("0.5");
-    curvePoint.y = double.parse(
-        (0.5 + (3 / MediaQuery.of(context).size.height)).toString());
-    curvePoint.tipsMessage = "点击这里进入搜索商品价格页面！";
-    curvePoint.nextString = "下一步";
-    curvePointList.add(curvePoint);
-
-    CurvePoint curvePoint1 = CurvePoint(0, 0);
-    curvePoint1.x = double.parse("0.5");
-    curvePoint1.y = double.parse(
-        (0.5 + (87 / MediaQuery.of(context).size.height)).toString());
-    curvePoint1.tipsMessage = "点击这里进入搜索商品价格页面！";
-    curvePoint1.nextString = "完成";
-    curvePointList.add(curvePoint1);
-    return curvePointList;
-  }
-
-  void show1() {
-    ///获取模拟数据
-    List<CurvePoint> curvePointList = randomTestData();
-    showBeginnerGuidance(context,
-        curvePointList: curvePointList,
-        pointX: 0,
-        pointY: 0,
-        isSlide: true,
-        logs: true,
-        nextBackgroundColor: Color(0xff568AFF), clickCallback: (isEnd) {
-      if (isEnd) {
-        Global.preferences.setBool(Global.HAS_GUIDE_KEY, true);
+      if (Global.preferences.getBool(Global.AGREE_USE_KEY) ==
+          null ||
+          !Global.preferences.getBool(Global.AGREE_USE_KEY)) {
+        showCupertinoDialog(
+            context: context,
+            builder: (context) {
+              return new CupertinoAlertDialog(
+                title: new Text("使用條款"),
+                content: new Text("内容内容内容内容内容内容内容内容内容内容内容"),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: new Text(
+                      "取消",
+                      style: TextStyle(color: Color(0xff007AFF)),
+                    ),
+                  ),
+                  new FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Global.preferences
+                          .setBool(Global.AGREE_USE_KEY, true);
+                      _uploadFiles(val);
+                    },
+                    child: new Text("同意並上傳",
+                        style: TextStyle(color: Color(0xff007AFF))),
+                  ),
+                ],
+              );
+            });
       }
-    });
+    }
   }
 }

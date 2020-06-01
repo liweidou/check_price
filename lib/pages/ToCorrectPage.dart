@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:check_price/beans/ProductResponeBean.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
+import 'package:check_price/utils/CommonUtils.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +132,7 @@ class _ToCorrectPageState extends State<ToCorrectPage> {
       Navigator.pop(context,true);
     }, (erro) {
       Navigator.pop(context);
-      Fluttertoast.showToast(msg: "提交糾錯失敗");
+      CommonUtils.showToast(context,"提交糾錯失敗！");
     });
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/ThanksAdvisePage.dart';
+import 'package:check_price/utils/CommonUtils.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +95,7 @@ class _AdvisePageState extends State<AdvisePage> {
           CupertinoPageRoute(builder: (context) => ThanksAdvisePage()));
     }, (erro) {
       Navigator.pop(context);
-      Fluttertoast.showToast(msg: "提交意見失敗");
+      CommonUtils.showToast(context,"提交意見失敗！");
     });
   }
 }

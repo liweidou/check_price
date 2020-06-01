@@ -4,6 +4,7 @@ import 'package:check_price/beans/ProductResponeBean.dart';
 import 'package:check_price/customWidgets/PopupWindow.dart';
 import 'package:check_price/pages/HomePage.dart';
 import 'package:check_price/pages/PriceDetailsPage.dart';
+import 'package:check_price/utils/CommonUtils.dart';
 import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
@@ -189,7 +190,7 @@ class _PriceListPageState extends State<PriceListPage> {
     NetworkUtil.isConnected().then((value) {
       if (value) {
         if (Global.API_TOKEN.isEmpty) {
-          NetworkUtil.doLogin(() {
+          NetworkUtil.doLogin(context,() {
             currentPage = 1;
             NetworkUtil.get(getUrl(), true,
                 (respone) {
@@ -213,7 +214,7 @@ class _PriceListPageState extends State<PriceListPage> {
           }, (erro) {});
         }
       } else {
-        Fluttertoast.showToast(msg: "請檢查網絡！");
+        CommonUtils.showToast(context,"請檢查網絡！");
       }
       refreshController.finishRefresh(success: true);
     });
@@ -223,7 +224,7 @@ class _PriceListPageState extends State<PriceListPage> {
     NetworkUtil.isConnected().then((value) {
       if (value) {
         if (Global.API_TOKEN.isEmpty) {
-          NetworkUtil.doLogin(() {
+          NetworkUtil.doLogin(context,() {
             NetworkUtil.get(getUrl(), true, (respone) {
               currentPage++;
               ProductResponeBean productResponeBean =
@@ -241,7 +242,7 @@ class _PriceListPageState extends State<PriceListPage> {
             dataList.addAll(productResponeBean.results);
             setState(() {});
           }, (erro) {
-            NetworkUtil.doLogin(() {
+            NetworkUtil.doLogin(context,() {
               NetworkUtil.get("/product?page=" + currentPage.toString(), true,
                   (respone) {
                 currentPage++;
@@ -255,7 +256,7 @@ class _PriceListPageState extends State<PriceListPage> {
           });
         }
       } else {
-        Fluttertoast.showToast(msg: "請檢查網絡！");
+        CommonUtils.showToast(context,"請檢查網絡！");
       }
       refreshController.finishLoad(success: true, noMore: false);
     });
