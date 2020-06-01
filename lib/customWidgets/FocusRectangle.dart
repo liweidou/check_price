@@ -2,37 +2,26 @@ import 'package:flutter/material.dart';
 
 class FocusRectangle extends StatefulWidget {
   Color color;
-  bool isRight;
   FocusRectangleState focusRectangleState;
 
-  FocusRectangle({Key key, this.color, this.isRight}) : super(key: key);
+  FocusRectangle({Key key, this.color}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
     focusRectangleState = FocusRectangleState(
       color: color,
-      isRight: isRight,
     );
     return focusRectangleState;
   }
 
-  void setIsRight(bool ir) {
-    focusRectangleState.setState(() {
-      focusRectangleState.isRight = ir;
-    });
-  }
 }
 
 class FocusRectangleState extends State<FocusRectangle> {
   Color color;
-  bool isRight;
 
-  FocusRectangleState({Key key, this.color, this.isRight});
+  FocusRectangleState({Key key, this.color});
 
-  void setIsRight(bool ir) {
-    this.isRight = ir;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +46,7 @@ class FocusRectangleState extends State<FocusRectangle> {
             child: Text(""),
             decoration: BoxDecoration(
                 border: Border.all(
-                    color: isRight ? Colors.green : Colors.red, width: 2)),
+                    color: Colors.white, width: 2)),
           ),
           Positioned(
             top: MediaQuery.of(context).size.height / 9 + 5,

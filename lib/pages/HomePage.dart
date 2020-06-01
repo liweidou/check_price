@@ -264,7 +264,6 @@ class _HomePageState extends State<HomePage>
         builder: (context) => Camera(
           imageMask: FocusRectangle(
             color: Colors.black.withOpacity(0.5),
-            isRight: false,
           ),
         ));
 

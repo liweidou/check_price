@@ -100,7 +100,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
               print("label.text:" + label.text);
             }
             isRight = ir;
-            widget.imageMask.setIsRight(isRight);
             print("isright:" + isRight.toString());
           });
         },
@@ -131,6 +130,13 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
             NativeDeviceOrientationReader.orientation(context);
 
         _buttonPhoto() => Container(
+              width: 82,
+              height: 82,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: isRight ? Colors.green : Colors.red,
+                      width: 2,
+                      style: BorderStyle.solid)),
               child: IconButton(
                 icon: Icon(
                   CupertinoIcons.circle_filled,
@@ -138,13 +144,11 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                   size: 80,
                 ),
                 onPressed: () {
-                  if(isRight) {
-                    sizeImage = MediaQuery
-                        .of(context)
-                        .size;
+                  if (isRight) {
+                    sizeImage = MediaQuery.of(context).size;
                     bloc.onTakePictureButtonPressed();
                     bloc.onTakePictureButtonPressed();
-                  }else{
+                  } else {
                     Fluttertoast.showToast(msg: "請拍收據");
                   }
                 },
@@ -204,7 +208,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                 maxWidth: size.height * previewRatio,
                                 child: Image.file(snapshot.data),
                               ),
-
                             ],
                           );
                         } else {
@@ -255,7 +258,7 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                 ),
                 if (widget.mode == CameraMode.fullscreen)
                   Container(
-                    margin: EdgeInsets.only(top: height - height / 4.5),
+                    margin: EdgeInsets.only(top: height - height / 3),
                     child: StreamBuilder<Object>(
                         stream: bloc.imagePath.stream,
                         builder: (context, snapshot) {
@@ -338,25 +341,38 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                       height: 80,
                                     ),
                                     Container(
-                                      width: 80,
-                                      height: 100,
-                                      child: IconButton(
-                                        icon: Icon(
-                                          CupertinoIcons.circle_filled,
-                                          color: Colors.white,
-                                          size: 76,
+                                      width: 72,
+                                      height: 72,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: isRight
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                              width: 2,
+                                              style: BorderStyle.solid),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(37))),
+                                      child: Align(
+                                        alignment: FractionalOffset(0.08, -0.5),
+                                        child: IconButton(
+                                          icon: Icon(
+                                            CupertinoIcons.circle_filled,
+                                            color: Colors.white,
+                                            size: 80,
+                                          ),
+                                          onPressed: () {
+                                            if(isRight) {
+                                              sizeImage = MediaQuery
+                                                  .of(context)
+                                                  .size;
+                                              bloc.onTakePictureButtonPressed();
+                                              bloc.onTakePictureButtonPressed();
+                                            }else{
+                                              Fluttertoast.showToast(msg: "請拍收據");
+                                            }
+                                          },
+                                          padding: EdgeInsets.all(0),
                                         ),
-                                        onPressed: () {
-                                          if(isRight) {
-                                            sizeImage = MediaQuery
-                                                .of(context)
-                                                .size;
-                                            bloc.onTakePictureButtonPressed();
-                                            bloc.onTakePictureButtonPressed();
-                                          }else{
-                                            Fluttertoast.showToast(msg: "請拍收據");
-                                          }
-                                        },
                                       ),
                                     ),
                                     CircleAvatar(
@@ -380,7 +396,7 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
               ? BottomAppBar(
                   color: Colors.transparent,
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0, top: 10.0),
+                    padding: const EdgeInsets.only(bottom: 20.0, top: 10.0),
                     child: StreamBuilder<Object>(
                         stream: bloc.imagePath.stream,
                         builder: (context, snapshot) {
