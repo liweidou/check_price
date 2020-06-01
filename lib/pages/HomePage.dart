@@ -312,9 +312,8 @@ class _HomePageState extends State<HomePage>
                   borderRadius: BorderRadius.circular(35),
                 ),
                 onPressed: () {
-                  CommonUtils.showToast(context, "請檢查網絡！");
-//                  Navigator.push(context,
-//                      CupertinoPageRoute(builder: (context) => SearchPage()));
+                  Navigator.push(context,
+                      CupertinoPageRoute(builder: (context) => SearchPage()));
                 },
                 color: Color(0xff568AFF),
                 child: Row(
