@@ -20,7 +20,7 @@ import 'Global.dart';
 class NetworkUtil {
 //  response.bodyBytes
 
-  static SentryClient sentry = new SentryClient(dsn: "__PUBLIC_KEY__");
+  static SentryClient sentry = new SentryClient(dsn: "https://62a899ce780444e2988004ef102fddfe@o264632.ingest.sentry.io/5259902");
 
   static Future<bool> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());

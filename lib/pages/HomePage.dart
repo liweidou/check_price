@@ -97,8 +97,20 @@ class _HomePageState extends State<HomePage>
                 storage.ref().child('public').child('$uuid.jpg');
                 final StorageUploadTask uploadTask = ref.putFile(imageFile);
                 final StreamSubscription<StorageTaskEvent> streamSubscription =
-                uploadTask.events.listen((event) {
+                uploadTask.events.listen((event) async{
                   print('EVENT ${event.type}');
+                  if (uploadTask.isComplete) {
+                    if (uploadTask.isSuccessful) {
+
+                    } else if (uploadTask.isCanceled) {
+
+                    } else {
+                      await NetworkUtil.sentry.captureException(
+                        exception: uploadTask.lastSnapshot.error,
+                        stackTrace: uploadTask.lastSnapshot.error,
+                      );
+                    }
+                  }
                   if (uploadTask.isComplete) {
                     print('streamSubscription.uploadTask.isComplete');
                   }
