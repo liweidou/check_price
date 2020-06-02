@@ -101,25 +101,26 @@ class _HomePageState extends State<HomePage>
                   print('EVENT ${event.type}');
                   if (uploadTask.isComplete) {
                     if (uploadTask.isSuccessful) {
-
+                      await NetworkUtil.post("/api/counter", true, (respone) {
+                        Navigator.pop(context);
+                        Navigator.push(context,
+                            CupertinoPageRoute(builder: (context) => ThanksPage()));
+                      }, (erro) {
+                        CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
+                      });
                     } else if (uploadTask.isCanceled) {
-
+                      Navigator.pop(context);
                     } else {//失敗
+                      Navigator.pop(context);
                       CommonUtils.showToast(context, "錯誤碼:" + uploadTask.lastSnapshot.error.toString());
                       await NetworkUtil.sentry.captureException(
                         exception: uploadTask.lastSnapshot.error,
                         stackTrace: uploadTask.lastSnapshot.error,
                       );
+                      CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
                     }
 
                     streamSubscription.cancel();
-                    await NetworkUtil.post("/api/counter", true, (respone) {
-                      Navigator.pop(context);
-                      Navigator.push(context,
-                          CupertinoPageRoute(builder: (context) => ThanksPage()));
-                    }, (erro) {
-                      CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
-                    });
                   }
                 });
               } else {
@@ -127,7 +128,7 @@ class _HomePageState extends State<HomePage>
               }
             }, (erro) {
               Navigator.pop(context);
-              Fluttertoast.showToast(msg: erro);
+              CommonUtils.showToast(context, "您沒有上傳權限，請提意見給我們！");
             });
       } else {
         CommonUtils.showToast(context, "請檢查網絡！");

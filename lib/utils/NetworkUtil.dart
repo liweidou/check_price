@@ -20,7 +20,9 @@ import 'Global.dart';
 class NetworkUtil {
 //  response.bodyBytes
 
-  static SentryClient sentry = new SentryClient(dsn: "https://62a899ce780444e2988004ef102fddfe@o264632.ingest.sentry.io/5259902");
+  static SentryClient sentry = new SentryClient(
+      dsn:
+          "https://62a899ce780444e2988004ef102fddfe@o264632.ingest.sentry.io/5259902");
 
   static Future<bool> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -180,7 +182,7 @@ class NetworkUtil {
         response.statusCode >= 200 &&
         response.statusCode < 300)
       onSuccess(response);
-    else{
+    else {
       onFailed(response.reasonPhrase);
       await sentry.captureException(
         exception: response.statusCode,
@@ -189,7 +191,7 @@ class NetworkUtil {
     }
   }
 
-  static void doLogin(BuildContext context,Function afterSetToken) async {
+  static void doLogin(BuildContext context, Function afterSetToken) async {
     NetworkUtil.isConnected().then((value) async {
       if (value) {
         String refreshTokenValue =
@@ -226,19 +228,19 @@ class NetworkUtil {
             cycleRefreshToken(context);
           }, (erro) {
             Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
-            doLogin(context,afterSetToken);
+            doLogin(context, afterSetToken);
           });
         }
       } else {
-        CommonUtils.showToast(context,"請檢查網絡！");
+        CommonUtils.showToast(context, "請檢查網絡！");
       }
     });
   }
 
-  static void cycleRefreshToken(BuildContext context){
+  static void cycleRefreshToken(BuildContext context) {
     Global.timer?.cancel();
     Global.timer = Timer.periodic(Duration(minutes: 5), (timer) {
-      NetworkUtil.doLogin(context,() {});
+      NetworkUtil.doLogin(context, () {});
     });
   }
 
@@ -254,18 +256,20 @@ class NetworkUtil {
         if (Platform.isAndroid) {
           AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
           ostype = "android";
+          platformImei = await ImeiPlugin.getImei(
+              shouldShowRequestPermissionRationale: false);
           deviceversion = androidInfo.version.release;
         } else if (Platform.isIOS) {
           // e.g. "Moto G (4)"
           IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+          platformImei = await ImeiPlugin.getImei();
           ostype = "ios";
           deviceversion = iosInfo.systemVersion;
         }
-        platformImei = await ImeiPlugin.getImei(
-            shouldShowRequestPermissionRationale: false);
         idunique = await ImeiPlugin.getId();
         print(" deviceversion:" + deviceversion);
       } on PlatformException {
+        Fluttertoast.showToast(msg: "Failed to get platform version.");
         platformImei = 'Failed to get platform version.';
       }
       var params = {
