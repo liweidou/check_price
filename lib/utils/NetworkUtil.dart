@@ -249,7 +249,6 @@ class NetworkUtil {
         Global.preferences.getBool(Global.NO_REGISTER_DEVICE)) {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
       String platformImei;
-      String idunique;
       String ostype;
       String deviceversion;
       try {
@@ -262,25 +261,14 @@ class NetworkUtil {
         } else if (Platform.isIOS) {
           // e.g. "Moto G (4)"
           Fluttertoast.showToast(msg: "doing register ios Device");
-//          IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+          IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
           platformImei = await ImeiPlugin.getImei();
           ostype = "ios";
-//          deviceversion = iosInfo.systemVersion;
-          deviceversion = "6s";
+          deviceversion = iosInfo.systemVersion;
         }
-//        idunique = await ImeiPlugin.getId();
-//        print(" deviceversion:" + deviceversion);
       } on PlatformException {
         platformImei = 'Failed to get platform version.';
       }
-      CommonUtils.showToast(
-          context,
-          "platformImei:" +
-              platformImei +
-              " ostype:" +
-              ostype +
-              " deviceversion:" +
-              deviceversion);
       var params = {
         "ostype": ostype,
         "deviceime": platformImei,
@@ -291,10 +279,8 @@ class NetworkUtil {
           (respone) {
         Global.preferences.setBool(Global.NO_REGISTER_DEVICE, false);
       }, (erro) {
-        Fluttertoast.showToast(msg: "erro:" + erro.toString());
+        Fluttertoast.showToast(msg: "注册设备失败:" + erro.toString());
       });
-    } else {
-      CommonUtils.showToast(context, "已经注册device");
     }
   }
 }
