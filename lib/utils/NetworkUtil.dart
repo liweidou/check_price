@@ -247,7 +247,6 @@ class NetworkUtil {
   static void registerDevice(BuildContext context) async {
     if (Global.preferences.getBool(Global.NO_REGISTER_DEVICE) == null ||
         Global.preferences.getBool(Global.NO_REGISTER_DEVICE)) {
-      Fluttertoast.showToast(msg: "doing registerDevice");
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
       String platformImei;
       String idunique;
@@ -262,13 +261,15 @@ class NetworkUtil {
           deviceversion = androidInfo.version.release;
         } else if (Platform.isIOS) {
           // e.g. "Moto G (4)"
-          IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+          Fluttertoast.showToast(msg: "doing register ios Device");
+//          IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
           platformImei = await ImeiPlugin.getImei();
           ostype = "ios";
-          deviceversion = iosInfo.systemVersion;
+//          deviceversion = iosInfo.systemVersion;
+          deviceversion = "6s";
         }
-        idunique = await ImeiPlugin.getId();
-        print(" deviceversion:" + deviceversion);
+//        idunique = await ImeiPlugin.getId();
+//        print(" deviceversion:" + deviceversion);
       } on PlatformException {
         platformImei = 'Failed to get platform version.';
       }
