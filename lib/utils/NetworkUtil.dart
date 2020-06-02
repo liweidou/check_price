@@ -247,6 +247,7 @@ class NetworkUtil {
   static void registerDevice(BuildContext context) async {
     if (Global.preferences.getBool(Global.NO_REGISTER_DEVICE) == null ||
         Global.preferences.getBool(Global.NO_REGISTER_DEVICE)) {
+      Fluttertoast.showToast(msg: "doing registerDevice");
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
       String platformImei;
       String idunique;
@@ -287,10 +288,12 @@ class NetworkUtil {
       var body = utf8.encode(json.encode(params));
       await NetworkUtil.postWithBody("/api/device/register", body, true,
           (respone) {
-        Global.preferences.setBool(Global.NO_REGISTER_DEVICE, true);
+        Global.preferences.setBool(Global.NO_REGISTER_DEVICE, false);
       }, (erro) {
-            CommonUtils.showToast(context, "erro:" + erro.toString());
-          });
+        Fluttertoast.showToast(msg: "erro:" + erro.toString());
+      });
+    } else {
+      CommonUtils.showToast(context, "已经注册device");
     }
   }
 }
