@@ -209,7 +209,7 @@ class NetworkUtil {
                 Global.TOKEN_PREFIX + " " + loginResponeBean.access;
             Global.preferences
                 .setString(Global.REFRESH_TOKEN_KEY, loginResponeBean.refresh);
-            registerDevice();
+            registerDevice(context);
             afterSetToken();
             cycleRefreshToken(context);
           }, (erro) {});
@@ -223,7 +223,7 @@ class NetworkUtil {
                     jsonDecode(Utf8Decoder().convert(response.bodyBytes)));
             Global.API_TOKEN =
                 Global.TOKEN_PREFIX + " " + loginResponeBean.access;
-            registerDevice();
+            registerDevice(context);
             afterSetToken();
             cycleRefreshToken(context);
           }, (erro) {
@@ -244,7 +244,7 @@ class NetworkUtil {
     });
   }
 
-  static void registerDevice() async {
+  static void registerDevice(BuildContext context) async {
     if (Global.preferences.getBool(Global.NO_REGISTER_DEVICE) == null ||
         Global.preferences.getBool(Global.NO_REGISTER_DEVICE)) {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -269,9 +269,16 @@ class NetworkUtil {
         idunique = await ImeiPlugin.getId();
         print(" deviceversion:" + deviceversion);
       } on PlatformException {
-        Fluttertoast.showToast(msg: "Failed to get platform version.");
         platformImei = 'Failed to get platform version.';
       }
+      CommonUtils.showToast(
+          context,
+          "platformImei:" +
+              platformImei +
+              " ostype:" +
+              ostype +
+              " deviceversion:" +
+              deviceversion);
       var params = {
         "ostype": ostype,
         "deviceime": platformImei,
@@ -281,7 +288,9 @@ class NetworkUtil {
       await NetworkUtil.postWithBody("/api/device/register", body, true,
           (respone) {
         Global.preferences.setBool(Global.NO_REGISTER_DEVICE, true);
-      }, (erro) {});
+      }, (erro) {
+            CommonUtils.showToast(context, "erro:" + erro.toString());
+          });
     }
   }
 }
