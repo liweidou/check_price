@@ -57,6 +57,8 @@ class _ToCorrectPageState extends State<ToCorrectPage> {
             Container(
               margin: EdgeInsets.only(top: 16),
               child: TextField(
+                cursorColor: Colors.blue,
+                showCursor: true,
                 textAlignVertical: TextAlignVertical.center,
                 controller: priceCtr,
                 keyboardType: TextInputType.number,
@@ -87,6 +89,8 @@ class _ToCorrectPageState extends State<ToCorrectPage> {
             Container(
               margin: EdgeInsets.only(top: 16),
               child: TextField(
+                cursorColor: Colors.blue,
+                showCursor: true,
                 textAlignVertical: TextAlignVertical.center,
                 controller: addressCtr,
                 keyboardType: TextInputType.text,

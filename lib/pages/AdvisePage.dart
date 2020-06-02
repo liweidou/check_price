@@ -61,6 +61,8 @@ class _AdvisePageState extends State<AdvisePage> {
               margin: EdgeInsets.only(top: 13,bottom: 13),
               color: Colors.white,
               child: TextField(
+                cursorColor: Colors.blue,
+                showCursor: true,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 focusNode: focusNode,

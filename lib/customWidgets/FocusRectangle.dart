@@ -40,28 +40,37 @@ class FocusRectangleState extends State<FocusRectangle> {
                 right: MediaQuery.of(context).size.width / 10,
                 top: MediaQuery.of(context).size.height / 16),
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 12,
+            height: MediaQuery.of(context).size.height / 6,
             child: Text(""),
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
                 blurRadius: 2, //阴影范
-                color: Color(0x0000000),
+                color: Color(0x00000000),
                 offset: Offset(1, 1),
               ),
             ], border: Border.all(color: Colors.white, width: 2),
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height / 7 + 5,
-            left: MediaQuery.of(context).size.width / 2 - 110,
+            top: MediaQuery.of(context).size.height / 4 + 1,
+            left: MediaQuery.of(context).size.width / 2 - 140,
             child: Container(
-              width: 220,
+              width: 280,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                  blurRadius: 2, //阴影范
+                  color: Color(0x3f000000),
+                  offset: Offset(1, 1),
+                ),
+              ], border: Border.all(color: Colors.transparent, width: 2),
+              ),
               child: Text(
                 "收據商標一定要放在框線內",
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

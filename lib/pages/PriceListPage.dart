@@ -207,7 +207,10 @@ class _PriceListPageState extends State<PriceListPage> {
                 dataList.clear();
                 dataList.addAll(productResponeBean.results);
               });
-            }, (erro) {});
+              refreshController.finishRefresh(success: true);
+            }, (erro) {
+              refreshController.finishRefresh(success: false);
+            });
           });
         } else {
           currentPage = 1;
@@ -219,12 +222,15 @@ class _PriceListPageState extends State<PriceListPage> {
               dataList.clear();
               dataList.addAll(productResponeBean.results);
             });
-          }, (erro) {});
+            refreshController.finishRefresh(success: true);
+          }, (erro) {
+            refreshController.finishRefresh(success: false);
+          });
         }
       } else {
         CommonUtils.showToast(context, "請檢查網絡！");
+        refreshController.finishRefresh(success: false);
       }
-      refreshController.finishRefresh(success: true);
     });
   }
 

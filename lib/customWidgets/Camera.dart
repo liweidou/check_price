@@ -4,7 +4,6 @@ import 'package:camera/camera.dart';
 import 'package:camera_camera/page/bloc/bloc_camera.dart';
 import 'package:camera_camera/shared/widgets/orientation_icon.dart';
 import 'package:camera_camera/shared/widgets/rotate_icon.dart';
-import 'package:check_price/customWidgets/FocusRectangle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -83,19 +82,23 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
         NativeDeviceOrientation orientation =
             NativeDeviceOrientationReader.orientation(context);
 
-        _buttonPhoto() => Container(
+        _buttonPhoto() =>
+            CircleAvatar(
               child: IconButton(
-                icon: Icon(
-                  CupertinoIcons.circle_filled,
-                  color: Colors.white,
-                  size: 80,
+                icon: OrientationWidget(
+                  orientation: orientation,
+                  child: Icon(CupertinoIcons.circle_filled,
+                      color: Colors.white),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   sizeImage = MediaQuery.of(context).size;
                   bloc.onTakePictureButtonPressed();
                 },
               ),
-            );
+              backgroundColor: Colors.black38,
+              radius: 25.0,
+            )
+           ;
 
         Widget _getButtonPhoto() {
           if (widget.orientationEnablePhoto == CameraOrientation.all) {
@@ -263,26 +266,7 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                                       ),
                                       height: 80,
                                     ),
-                                    Container(
-                                      width: 72,
-                                      height: 72,
-                                      child: Align(
-                                        alignment: FractionalOffset(0.08, -0.5),
-                                        child: IconButton(
-                                          icon: Icon(
-                                            CupertinoIcons.circle_filled,
-                                            color: Colors.white,
-                                            size: 80,
-                                          ),
-                                          onPressed: () {
-                                            sizeImage =
-                                                MediaQuery.of(context).size;
-                                            bloc.onTakePictureButtonPressed();
-                                          },
-                                          padding: EdgeInsets.all(0),
-                                        ),
-                                      ),
-                                    ),
+                                    _getButtonPhoto(),
                                     CircleAvatar(
                                       child: Text(""),
                                       backgroundColor: Colors.transparent,

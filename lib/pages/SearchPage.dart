@@ -48,6 +48,8 @@ class _SearchPageState extends State<SearchPage> with WidgetsBindingObserver {
                 children: <Widget>[
                   Container(
                     child: TextField(
+                      cursorColor: Colors.blue,
+                      showCursor: true,
                       onChanged: (str) {
                         setState(() {});
                       },

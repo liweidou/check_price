@@ -48,7 +48,8 @@ class _HomePageState extends State<HomePage>
 
   BannerAd createBannerAd() {
     return BannerAd(
-      adUnitId: BannerAd.testAdUnitId,
+      adUnitId: (Platform.isIOS || Platform.isMacOS)
+          ? "ca-app-pub-5426843524329045/3629387819" : "ca-app-pub-5426843524329045/3281903454",
       size: AdSize.banner,
       targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
@@ -85,50 +86,56 @@ class _HomePageState extends State<HomePage>
         };
         var body = utf8.encode(json.encode(params));
         await NetworkUtil.postWithBody("/api/device/permission", body, true,
-                (respone) async {
-              UploadPermissionResponeBean uploadPermissionResponeBean =
+            (respone) async {
+          UploadPermissionResponeBean uploadPermissionResponeBean =
               UploadPermissionResponeBean.fromJson(
                   jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-              if (uploadPermissionResponeBean.code == 200 &&
-                  uploadPermissionResponeBean.result.permission) {
-                String uuid = Uuid().v1();
-                final StorageReference ref =
+          if (uploadPermissionResponeBean.code == 200 &&
+              uploadPermissionResponeBean.result.permission) {
+            String uuid = Uuid().v1();
+            final StorageReference ref =
                 storage.ref().child('public').child('$uuid.jpg');
-                final StorageUploadTask uploadTask = ref.putFile(imageFile);
-                StreamSubscription<StorageTaskEvent> streamSubscription;
-                streamSubscription = uploadTask.events.listen((event) async{
-                  print('EVENT ${event.type}');
-                  if (uploadTask.isComplete) {
-                    if (uploadTask.isSuccessful) {
-                      await NetworkUtil.post("/api/counter", true, (respone) {
-                        Navigator.pop(context);
-                        Navigator.push(context,
-                            CupertinoPageRoute(builder: (context) => ThanksPage()));
-                      }, (erro) {
-                        CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
-                      });
-                    } else if (uploadTask.isCanceled) {
-                      Navigator.pop(context);
-                    } else {//失敗
-                      Navigator.pop(context);
-                      CommonUtils.showToast(context, "錯誤碼:" + uploadTask.lastSnapshot.error.toString());
-                      await NetworkUtil.sentry.captureException(
-                        exception: uploadTask.lastSnapshot.error,
-                        stackTrace: uploadTask.lastSnapshot.error,
-                      );
-                      CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
-                    }
+            final StorageUploadTask uploadTask = ref.putFile(imageFile);
+            StreamSubscription<StorageTaskEvent> streamSubscription;
+            streamSubscription = uploadTask.events.listen((event) async {
+              print('EVENT ${event.type}');
+              if (uploadTask.isComplete) {
+                if (uploadTask.isSuccessful) {
+                  await NetworkUtil.post("/api/counter", true, (respone) {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => ThanksPage())).then((value) {
+                      getSumCount();
+                    });
+                  }, (erro) {
+                    CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
+                  });
+                } else if (uploadTask.isCanceled) {
+                  Navigator.pop(context);
+                } else {
+                  //失敗
+                  Navigator.pop(context);
+                  CommonUtils.showToast(context,
+                      "錯誤碼:" + uploadTask.lastSnapshot.error.toString());
+                  await NetworkUtil.sentry.captureException(
+                    exception: uploadTask.lastSnapshot.error,
+                    stackTrace: uploadTask.lastSnapshot.error,
+                  );
+                  CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
+                }
 
-                    streamSubscription.cancel();
-                  }
-                });
-              } else {
-                CommonUtils.showToast(context, "請提意見給我們！");
+                streamSubscription.cancel();
               }
-            }, (erro) {
-              Navigator.pop(context);
-              CommonUtils.showToast(context, "您沒有上傳權限，請提意見給我們！");
             });
+          } else {
+            CommonUtils.showToast(context, "請提意見給我們！");
+          }
+        }, (erro) {
+          Navigator.pop(context);
+          CommonUtils.showToast(context, "您沒有上傳權限，請提意見給我們！");
+        });
       } else {
         CommonUtils.showToast(context, "請檢查網絡！");
       }
@@ -143,17 +150,27 @@ class _HomePageState extends State<HomePage>
         appId: Platform.isAndroid
             ? 'ca-app-pub-5426843524329045~3274164592'
             : 'ca-app-pub-5426843524329045~5102800320');
-    _bannerAd = createBannerAd()
-      ..load();
-    _bannerAd ??= createBannerAd();
-    _bannerAd
-      ..load()
-      ..show(horizontalCenterOffset: 0, anchorOffset: 0);
     initPrefrence();
 
     WidgetsBinding.instance.addObserver(this);
 
     initFireBase();
+  }
+
+  void initAndShowBanner() {
+    if (_bannerAd == null) {
+      _bannerAd ??= createBannerAd();
+      _bannerAd
+        ..load()
+        ..show(horizontalCenterOffset: 0, anchorOffset: 0);
+    }
+  }
+
+  void hideBanner() {
+    if (_bannerAd != null) {
+      _bannerAd.dispose();
+      _bannerAd = null;
+    }
   }
 
   randomTestData() {
@@ -163,10 +180,7 @@ class _HomePageState extends State<HomePage>
     CurvePoint curvePoint = CurvePoint(0, 0);
     curvePoint.x = double.parse("0.5");
     curvePoint.y = double.parse(
-        (0.5 + (3 / MediaQuery
-            .of(context)
-            .size
-            .height)).toString());
+        (0.5 + (3 / MediaQuery.of(context).size.height)).toString());
     curvePoint.tipsMessage = "点击这里进入搜索商品价格页面！";
     curvePoint.nextString = "下一步";
     curvePointList.add(curvePoint);
@@ -174,10 +188,7 @@ class _HomePageState extends State<HomePage>
     CurvePoint curvePoint1 = CurvePoint(0, 0);
     curvePoint1.x = double.parse("0.5");
     curvePoint1.y = double.parse(
-        (0.5 + (87 / MediaQuery
-            .of(context)
-            .size
-            .height)).toString());
+        (0.5 + (87 / MediaQuery.of(context).size.height)).toString());
     curvePoint1.tipsMessage = "点击这里进入搜索商品价格页面！";
     curvePoint1.nextString = "完成";
     curvePointList.add(curvePoint1);
@@ -204,10 +215,10 @@ class _HomePageState extends State<HomePage>
                   logs: true,
                   nextBackgroundColor: Color(0xff568AFF),
                   clickCallback: (isEnd) {
-                    if (isEnd) {
-                      Global.preferences.setBool(Global.HAS_GUIDE_KEY, true);
-                    }
-                  });
+                if (isEnd) {
+                  Global.preferences.setBool(Global.HAS_GUIDE_KEY, true);
+                }
+              });
             });
           }
           getSumCount();
@@ -221,10 +232,10 @@ class _HomePageState extends State<HomePage>
       CounterResponeBean counterResponeBean = CounterResponeBean.fromJson(
           jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
       AnimationController animationController =
-      AnimationController(vsync: this, duration: Duration(seconds: 2));
+          AnimationController(vsync: this, duration: Duration(seconds: 2));
       Animation<int> animation =
-      IntTween(begin: 0, end: counterResponeBean.result)
-          .animate(animationController);
+          IntTween(begin: 0, end: counterResponeBean.result)
+              .animate(animationController);
       animationController.addListener(() {
         setState(() {
           count = animation.value;
@@ -245,7 +256,6 @@ class _HomePageState extends State<HomePage>
         break;
       case AppLifecycleState.resumed: // 应用程序可见，前台
         print('这个是状态222222>>>>...前台');
-        getSumCount();
         break;
       case AppLifecycleState.paused: // 应用程序不可见，后台
         print('这个是状态33333>>>>...后台');
@@ -286,7 +296,7 @@ class _HomePageState extends State<HomePage>
             Container(
               margin: EdgeInsets.only(top: 30),
               child: Text(
-                "合理化的自由市場",
+                "萬眾同心 齊齊慳錢",
                 style: TextStyle(color: Colors.black, fontSize: 17),
               ),
             ),
@@ -309,8 +319,10 @@ class _HomePageState extends State<HomePage>
                   borderRadius: BorderRadius.circular(35),
                 ),
                 onPressed: () {
-                  Navigator.push(context,
-                      CupertinoPageRoute(builder: (context) => SearchPage()));
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                          builder: (context) => SearchPage()));
                 },
                 color: Color(0xff568AFF),
                 child: Row(
@@ -372,9 +384,12 @@ class _HomePageState extends State<HomePage>
                   "意見回饋",
                   style: TextStyle(color: Color(0xff4A4A4A), fontSize: 14),
                 ),
-                onPressed: () =>
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (context) => AdvisePage())),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                          builder: (context) => AdvisePage()));
+                },
               ),
             ),
             Expanded(
@@ -388,18 +403,17 @@ class _HomePageState extends State<HomePage>
   }
 
   void takePhoto() async {
+    hideBanner();
     File val = await showDialog(
         context: context,
-        builder: (context) =>
-            Camera(
+        builder: (context) => Camera(
               imageMask: FocusRectangle(
                 color: Colors.black.withOpacity(0),
               ),
             ));
-
+    initAndShowBanner();
     if (val != null) {
-      if (Global.preferences.getBool(Global.AGREE_USE_KEY) ==
-          null ||
+      if (Global.preferences.getBool(Global.AGREE_USE_KEY) == null ||
           !Global.preferences.getBool(Global.AGREE_USE_KEY)) {
         showCupertinoDialog(
             context: context,
@@ -420,8 +434,7 @@ class _HomePageState extends State<HomePage>
                   new FlatButton(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      Global.preferences
-                          .setBool(Global.AGREE_USE_KEY, true);
+                      Global.preferences.setBool(Global.AGREE_USE_KEY, true);
                       _uploadFiles(val);
                     },
                     child: new Text("同意並上傳",
@@ -430,7 +443,7 @@ class _HomePageState extends State<HomePage>
                 ],
               );
             });
-      }else{
+      } else {
         _uploadFiles(val);
       }
     }
