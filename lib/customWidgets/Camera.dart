@@ -15,7 +15,7 @@ enum CameraOrientation { landscape, portrait, all }
 enum CameraMode { fullscreen, normal }
 
 class Camera extends StatefulWidget {
-  final FocusRectangle imageMask;
+  final Widget imageMask;
   final CameraMode mode;
   final Widget warning;
   final CameraOrientation orientationEnablePhoto;
@@ -62,7 +62,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
-
   }
 
   @override
@@ -85,8 +84,6 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
             NativeDeviceOrientationReader.orientation(context);
 
         _buttonPhoto() => Container(
-              width: 82,
-              height: 82,
               child: IconButton(
                 icon: Icon(
                   CupertinoIcons.circle_filled,

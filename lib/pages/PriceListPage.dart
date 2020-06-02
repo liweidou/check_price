@@ -59,6 +59,8 @@ class _PriceListPageState extends State<PriceListPage> {
         child: Container(
           color: Colors.white,
           child: EasyRefresh(
+            enableControlFinishLoad: true,
+            enableControlFinishRefresh: true,
             controller: refreshController,
             header: BallPulseHeader(),
             footer: BallPulseFooter(),
@@ -201,9 +203,10 @@ class _PriceListPageState extends State<PriceListPage> {
               ProductResponeBean productResponeBean =
                   ProductResponeBean.fromJson(
                       jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-              dataList.clear();
-              dataList.addAll(productResponeBean.results);
-              setState(() {});
+              setState(() {
+                dataList.clear();
+                dataList.addAll(productResponeBean.results);
+              });
             }, (erro) {});
           });
         } else {
@@ -212,9 +215,10 @@ class _PriceListPageState extends State<PriceListPage> {
             currentPage++;
             ProductResponeBean productResponeBean = ProductResponeBean.fromJson(
                 jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-            dataList.clear();
-            dataList.addAll(productResponeBean.results);
-            setState(() {});
+            setState(() {
+              dataList.clear();
+              dataList.addAll(productResponeBean.results);
+            });
           }, (erro) {});
         }
       } else {

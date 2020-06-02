@@ -260,7 +260,6 @@ class NetworkUtil {
           deviceversion = androidInfo.version.release;
         } else if (Platform.isIOS) {
           // e.g. "Moto G (4)"
-          Fluttertoast.showToast(msg: "doing register ios Device");
           IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
           platformImei = await ImeiPlugin.getImei();
           ostype = "ios";
