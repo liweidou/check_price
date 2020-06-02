@@ -96,34 +96,31 @@ class _HomePageState extends State<HomePage>
                 final StorageReference ref =
                 storage.ref().child('public').child('$uuid.jpg');
                 final StorageUploadTask uploadTask = ref.putFile(imageFile);
-                final StreamSubscription<StorageTaskEvent> streamSubscription =
-                uploadTask.events.listen((event) async{
+                StreamSubscription<StorageTaskEvent> streamSubscription;
+                streamSubscription = uploadTask.events.listen((event) async{
                   print('EVENT ${event.type}');
                   if (uploadTask.isComplete) {
                     if (uploadTask.isSuccessful) {
 
                     } else if (uploadTask.isCanceled) {
 
-                    } else {
+                    } else {//失敗
+                      CommonUtils.showToast(context, "錯誤碼:" + uploadTask.lastSnapshot.error.toString());
                       await NetworkUtil.sentry.captureException(
                         exception: uploadTask.lastSnapshot.error,
                         stackTrace: uploadTask.lastSnapshot.error,
                       );
                     }
+
+                    streamSubscription.cancel();
+                    await NetworkUtil.post("/api/counter", true, (respone) {
+                      Navigator.pop(context);
+                      Navigator.push(context,
+                          CupertinoPageRoute(builder: (context) => ThanksPage()));
+                    }, (erro) {
+                      CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
+                    });
                   }
-                  if (uploadTask.isComplete) {
-                    print('streamSubscription.uploadTask.isComplete');
-                  }
-                });
-                await uploadTask.onComplete;
-                print('uploadTask.isComplete');
-                streamSubscription.cancel();
-                await NetworkUtil.post("/api/counter", true, (respone) {
-                  Navigator.pop(context);
-                  Navigator.push(context,
-                      CupertinoPageRoute(builder: (context) => ThanksPage()));
-                }, (erro) {
-                  CommonUtils.showToast(context, "上傳失敗，請提意見給我們！");
                 });
               } else {
                 CommonUtils.showToast(context, "請提意見給我們！");

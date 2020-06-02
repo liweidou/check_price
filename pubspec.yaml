@@ -46,7 +46,7 @@ dependencies:
   firebase_core: ^0.4.4+3
   uuid: 2.0.4
   camera_camera: ^1.0.32+1
-  flutter_native_image: ^0.0.5+2
+#  flutter_native_image: ^0.0.5+2
   device_info: ^0.4.2+4
   imei_plugin: ^1.1.6
   connectivity: ^0.4.8+6
