@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:check_price/beans/ProductResponeBean.dart';
 import 'package:check_price/customWidgets/PopupWindow.dart';
-import 'package:check_price/pages/HomePage.dart';
 import 'package:check_price/pages/PriceDetailsPage.dart';
 import 'package:check_price/utils/CommonUtils.dart';
 import 'package:check_price/utils/Global.dart';
@@ -13,6 +12,8 @@ import 'package:flutter_easyrefresh/ball_pulse_footer.dart';
 import 'package:flutter_easyrefresh/ball_pulse_header.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../utils/CommonUtils.dart';
 
 class PriceListPage extends StatefulWidget {
   String productName;
@@ -195,6 +196,7 @@ class _PriceListPageState extends State<PriceListPage> {
   Future<void> onRefreshData() async {
     NetworkUtil.isConnected().then((value) {
       if (value) {
+        CommonUtils.showLoadingDialog(context, "加载资料中...");
         if (Global.API_TOKEN.isEmpty) {
           NetworkUtil.doLogin(context, () {
             currentPage = 1;
@@ -208,8 +210,10 @@ class _PriceListPageState extends State<PriceListPage> {
                 dataList.addAll(productResponeBean.results);
               });
               refreshController.finishRefresh(success: true);
+              Navigator.pop(context);
             }, (erro) {
               refreshController.finishRefresh(success: false);
+              Navigator.pop(context);
             });
           });
         } else {
@@ -223,8 +227,10 @@ class _PriceListPageState extends State<PriceListPage> {
               dataList.addAll(productResponeBean.results);
             });
             refreshController.finishRefresh(success: true);
+            Navigator.pop(context);
           }, (erro) {
             refreshController.finishRefresh(success: false);
+            Navigator.pop(context);
           });
         }
       } else {

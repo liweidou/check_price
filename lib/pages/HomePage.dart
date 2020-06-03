@@ -23,6 +23,8 @@ import 'package:imei_plugin/imei_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import '../utils/NetworkUtil.dart';
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -135,6 +137,7 @@ class _HomePageState extends State<HomePage>
         }, (erro) {
           Navigator.pop(context);
           CommonUtils.showToast(context, "您沒有上傳權限，請提意見給我們！");
+          NetworkUtil.registerDevice(context);
         });
       } else {
         CommonUtils.showToast(context, "請檢查網絡！");

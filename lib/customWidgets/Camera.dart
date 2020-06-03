@@ -84,19 +84,18 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
 
         _buttonPhoto() =>
             CircleAvatar(
-              child: IconButton(
-                icon: OrientationWidget(
+              child: InkWell(
+                child: OrientationWidget(
                   orientation: orientation,
-                  child: Icon(CupertinoIcons.circle_filled,
-                      color: Colors.white),
+                  child: Image.asset("images/circle.png",width: 80,height: 80,),
                 ),
-                onPressed: () async {
+                onTap: () async {
                   sizeImage = MediaQuery.of(context).size;
                   bloc.onTakePictureButtonPressed();
                 },
               ),
-              backgroundColor: Colors.black38,
-              radius: 25.0,
+              backgroundColor: Colors.transparent,
+              radius: 40.0,
             )
            ;
 

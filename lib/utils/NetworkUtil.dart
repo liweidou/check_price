@@ -245,6 +245,7 @@ class NetworkUtil {
   }
 
   static void registerDevice(BuildContext context) async {
+    print("registerDevice");
     if (Global.preferences.getBool(Global.NO_REGISTER_DEVICE) == null ||
         Global.preferences.getBool(Global.NO_REGISTER_DEVICE)) {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -260,10 +261,12 @@ class NetworkUtil {
           deviceversion = androidInfo.version.release;
         } else if (Platform.isIOS) {
           // e.g. "Moto G (4)"
+          print("registerDeviceisIOS");
           IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
           platformImei = await ImeiPlugin.getImei();
           ostype = "ios";
           deviceversion = iosInfo.systemVersion;
+          print("registerDeviceisIOSplatformImei:" + platformImei);
         }
       } on PlatformException {
         platformImei = 'Failed to get platform version.';
@@ -273,6 +276,7 @@ class NetworkUtil {
         "deviceime": platformImei,
         "deviceversion": deviceversion
       };
+      print("params:" + params.toString());
       var body = utf8.encode(json.encode(params));
       await NetworkUtil.postWithBody("/api/device/register", body, true,
           (respone) {
