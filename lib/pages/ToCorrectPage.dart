@@ -6,7 +6,6 @@ import 'package:check_price/utils/CommonUtils.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class ToCorrectPage extends StatefulWidget {
   Product product;
@@ -17,12 +16,22 @@ class ToCorrectPage extends StatefulWidget {
   _ToCorrectPageState createState() => _ToCorrectPageState(product);
 }
 
-class _ToCorrectPageState extends State<ToCorrectPage> {
+class _ToCorrectPageState extends State<ToCorrectPage> with WidgetsBindingObserver{
   TextEditingController priceCtr = TextEditingController();
   TextEditingController addressCtr = TextEditingController();
   Product product;
+  FocusNode focusNode = FocusNode(debugLabel: "input");
 
   _ToCorrectPageState(this.product);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      FocusScope.of(context).requestFocus(focusNode);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +66,8 @@ class _ToCorrectPageState extends State<ToCorrectPage> {
             Container(
               margin: EdgeInsets.only(top: 16),
               child: TextField(
+                focusNode: focusNode,
+                autofocus: true,
                 cursorColor: Colors.blue,
                 showCursor: true,
                 textAlignVertical: TextAlignVertical.center,

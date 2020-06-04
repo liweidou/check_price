@@ -2,6 +2,7 @@ import 'package:check_price/beans/ProductResponeBean.dart';
 import 'package:check_price/pages/ToCorrectPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 
 class PriceDetailsPage extends StatefulWidget {
   String address;
@@ -88,12 +89,20 @@ class _PriceDetailsPageState extends State<PriceDetailsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
             ),
-            Expanded(
+        Expanded(
               flex: 1,
               child: product.image.length == 0
                   ? Text("")
-                  : Image.network(product.image[0].imageurl),
+                  : PhotoView(
+                imageProvider: NetworkImage(product.image[0].imageurl),
+              ),
             )
+//            Expanded(
+//              flex: 1,
+//              child: product.image.length == 0
+//                  ? Text("")
+//                  : Image.network(product.image[0].imageurl),
+//            )
           ],
         ),
       ),
