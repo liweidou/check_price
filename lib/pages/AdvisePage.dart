@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/pages/ThanksAdvisePage.dart';
 import 'package:check_price/utils/CommonUtils.dart';
+import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -97,7 +98,18 @@ class _AdvisePageState extends State<AdvisePage> {
           CupertinoPageRoute(builder: (context) => ThanksAdvisePage()));
     }, (erro) {
       Navigator.pop(context);
-      CommonUtils.showToast(context,"提交意見失敗！");
+      if(erro.statusCode == 401){
+        NetworkUtil.doLogin((){
+          postAdvise(text);
+        });
+      }else if(erro.statusCode == 400){
+        Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
+        NetworkUtil.doLogin((){
+          postAdvise(text);
+        });
+      }else{
+        CommonUtils.showToast(context,"提交意見失敗！");
+      }
     });
   }
 }

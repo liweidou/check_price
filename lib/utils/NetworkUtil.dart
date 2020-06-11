@@ -55,11 +55,11 @@ class NetworkUtil {
     if (response != null &&
         response.statusCode >= 200 &&
         response.statusCode < 300) {
-      onSuccess(response);
       print("response:" + response.body);
+      onSuccess(response);
     } else {
-      onFailed(response.reasonPhrase);
       print("erro:" + response.reasonPhrase);
+      onFailed(response);
       await sentry.captureException(
         exception: response.statusCode,
         stackTrace: response.reasonPhrase,
@@ -90,6 +90,18 @@ class NetworkUtil {
       onSuccess(response);
       print("response:" + response.body);
     } else {
+      if(response.statusCode == 401){
+        doLogin((){
+          post(url,  useToken,
+              onSuccess, onFailed);
+        });
+      }else if(response.statusCode == 400){
+        Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
+        doLogin((){
+          post(url, useToken,
+              onSuccess, onFailed);
+        });
+      }
       onFailed(response.reasonPhrase);
       print("erro:" + response.reasonPhrase);
       await sentry.captureException(
@@ -117,7 +129,7 @@ class NetworkUtil {
       onSuccess(response);
       print("response:" + response.body);
     } else {
-      onFailed(response.reasonPhrase);
+      onFailed(response);
       print("responseerro:" + response.body);
       print("erro:" + response.reasonPhrase);
       await sentry.captureException(
@@ -191,7 +203,7 @@ class NetworkUtil {
     }
   }
 
-  static void doLogin(BuildContext context, Function afterSetToken) async {
+  static void doLogin(Function afterSetToken) async {
     NetworkUtil.isConnected().then((value) async {
       if (value) {
         String refreshTokenValue =
@@ -206,15 +218,14 @@ class NetworkUtil {
             LoginResponeBean loginResponeBean = LoginResponeBean.fromJson(
                 jsonDecode(Utf8Decoder().convert(response.bodyBytes)));
             Global.API_TOKEN =
-                Global.TOKEN_PREFIX + " " + loginResponeBean.access;
+                Global.TOKEN_PREFIX + " " + loginResponeBean.token;
             Global.preferences
-                .setString(Global.REFRESH_TOKEN_KEY, loginResponeBean.refresh);
-            registerDevice(context);
+                .setString(Global.REFRESH_TOKEN_KEY, loginResponeBean.token);
             afterSetToken();
-            cycleRefreshToken(context);
+            cycleRefreshToken();
           }, (erro) {});
         } else {
-          var params = {"refresh": refreshTokenValue};
+          var params = {"token": refreshTokenValue};
           var body = utf8.encode(json.encode(params));
           await NetworkUtil.postWithBody("/api/token/refresh", body, false,
               (response) {
@@ -222,29 +233,28 @@ class NetworkUtil {
                 RefreshTokenResponeBean.fromJson(
                     jsonDecode(Utf8Decoder().convert(response.bodyBytes)));
             Global.API_TOKEN =
-                Global.TOKEN_PREFIX + " " + loginResponeBean.access;
-            registerDevice(context);
+                Global.TOKEN_PREFIX + " " + loginResponeBean.token;
             afterSetToken();
-            cycleRefreshToken(context);
+            cycleRefreshToken();
           }, (erro) {
             Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
-            doLogin(context, afterSetToken);
+            doLogin(afterSetToken);
           });
         }
       } else {
-        CommonUtils.showToast(context, "請檢查網絡！");
+        Fluttertoast.showToast(msg: "請檢查網絡！");
       }
     });
   }
 
-  static void cycleRefreshToken(BuildContext context) {
+  static void cycleRefreshToken() {
     Global.timer?.cancel();
     Global.timer = Timer.periodic(Duration(minutes: 5), (timer) {
-      NetworkUtil.doLogin(context, () {});
+      NetworkUtil.doLogin(() {});
     });
   }
 
-  static void registerDevice(BuildContext context) async {
+  static void registerDevice(BuildContext context,Function afterRegister) async {
     print("registerDevice");
     if (Global.preferences.getBool(Global.NO_REGISTER_DEVICE) == null ||
         Global.preferences.getBool(Global.NO_REGISTER_DEVICE)) {
@@ -281,6 +291,7 @@ class NetworkUtil {
       await NetworkUtil.postWithBody("/api/device/register", body, true,
           (respone) {
         Global.preferences.setBool(Global.NO_REGISTER_DEVICE, false);
+        afterRegister();
       }, (erro) {
         Fluttertoast.showToast(msg: "注册设备失败:" + erro.toString());
       });

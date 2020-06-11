@@ -41,6 +41,8 @@ class _PriceListPageState extends State<PriceListPage> {
 
   int currentPage = 1;
 
+  bool isLoading = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -53,186 +55,220 @@ class _PriceListPageState extends State<PriceListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color(0xff4285F4),
-      child: SafeArea(
-        top: true,
-        child: Container(
+    return dataList.length == 0
+        ? Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back),
           color: Colors.white,
-          child: EasyRefresh(
-            enableControlFinishLoad: true,
-            enableControlFinishRefresh: true,
-            controller: refreshController,
-            header: BallPulseHeader(),
-            footer: BallPulseFooter(),
-            onRefresh: onRefreshData,
-            onLoad: onLoadMoreData,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverAppBar(
-                  backgroundColor: Color(0xff4285F4),
-                  leading: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.arrow_back),
-                    color: Colors.white,
-                  ),
-                  centerTitle: true,
-                  title: Text(
-                    productName,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  floating: true,
-                  pinned: true,
-                  snap: true,
-                  expandedHeight: 105,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Container(
-                      margin: EdgeInsets.only(top: 55),
-                      padding: EdgeInsets.only(right: 16),
-                      color: Colors.white,
-                      width: double.infinity,
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(left: 8),
-                            child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isTodayResluts = !isTodayResluts;
-                                });
-                                onRefreshData();
-                              },
-                              icon: Icon(
-                                Icons.check_box,
-                                color: isTodayResluts ? Colors.blue : Colors.grey,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "最新結果",
-                            style: TextStyle(color: Colors.black, fontSize: 18),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(""),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              showDialog(
-                                  context: context,
-                                  child: SimpleDialog(
-                                    title: Text("选择排序方式"),
-                                    children: <Widget>[
-                                      SimpleDialogOption(
-                                        child: Text(
-                                          "按时间排序",
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            isSortByTime = true;
-                                          });
-                                          Navigator.pop(context);
-                                          onRefreshData();
-                                        },
-                                      ),
-                                      SimpleDialogOption(
-                                        child: Text(
-                                          "按价格排序",
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            isSortByTime = false;
-                                          });
-                                          Navigator.pop(context);
-                                          onRefreshData();
-                                        },
-                                      )
-                                    ],
-                                  ));
-                            },
+        ),
+        centerTitle: true,
+        title: Text(
+          productName,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Color(0xff4285F4),
+      ),
+      body: Container(
+        margin: EdgeInsets.only(top: 120),
+        width: double.infinity,
+        child: Column(
+          children: <Widget>[
+            Text("很抱歉",style: TextStyle(color: Color(0xff666666),fontSize: 21),),
+            Text("暫時還沒有收錄你想要的",style: TextStyle(color: Color(0xff666666),fontSize: 21)),
+            Text("搜尋結果",style: TextStyle(color: Color(0xff666666),fontSize: 21)),
+            Container(
+              margin: EdgeInsets.only(top: 10),
+              child: Text("請返回",style: TextStyle(color: Color(0xff666666),fontSize: 21)),
+            ),
+            Text("再嘗試搜尋其它商品名稱",style: TextStyle(color: Color(0xff666666),fontSize: 21))
+          ],
+        ),
+      ),
+    )
+        : Container(
+            color: Color(0xff4285F4),
+            child: SafeArea(
+              top: true,
+              child: Container(
+                color: Colors.white,
+                child: EasyRefresh(
+                  enableControlFinishLoad: true,
+                  enableControlFinishRefresh: true,
+                  controller: refreshController,
+                  header: BallPulseHeader(),
+                  footer: BallPulseFooter(),
+                  onRefresh: onRefreshData,
+                  onLoad: onLoadMoreData,
+                  child: CustomScrollView(
+                    slivers: <Widget>[
+                      SliverAppBar(
+                        backgroundColor: Color(0xff4285F4),
+                        leading: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.arrow_back),
+                          color: Colors.white,
+                        ),
+                        centerTitle: true,
+                        title: Text(
+                          productName,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        floating: true,
+                        pinned: true,
+                        snap: true,
+                        expandedHeight: 105,
+                        flexibleSpace: FlexibleSpaceBar(
+                          background: Container(
+                            margin: EdgeInsets.only(top: 55),
+                            padding: EdgeInsets.only(right: 16),
+                            color: Colors.white,
+                            width: double.infinity,
                             child: Row(
                               children: <Widget>[
                                 Container(
-                                  child: Icon(Icons.keyboard_arrow_down),
-                                  margin: EdgeInsets.only(top: 5),
+                                  margin: EdgeInsets.only(left: 8),
+                                  child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isTodayResluts = !isTodayResluts;
+                                      });
+                                      onRefreshData();
+                                    },
+                                    icon: Icon(
+                                      Icons.check_box,
+                                      color: isTodayResluts
+                                          ? Colors.blue
+                                          : Colors.grey,
+                                    ),
+                                  ),
                                 ),
                                 Text(
-                                  isSortByTime ? "按時間排序" : "按价格排序",
+                                  "最新結果",
                                   style: TextStyle(
                                       color: Colors.black, fontSize: 18),
                                 ),
-                                IconButton(
-                                  onPressed: () => setState(() {
-                                    isAsec = !isAsec;
-                                    onRefreshData();
-                                  }),
-                                  icon: FaIcon(isAsec
-                                      ? FontAwesomeIcons.sortAmountUpAlt
-                                      : FontAwesomeIcons.sortAmountDownAlt),
+                                Expanded(
+                                  flex: 1,
+                                  child: Text(""),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        child: SimpleDialog(
+                                          title: Text("选择排序方式"),
+                                          children: <Widget>[
+                                            SimpleDialogOption(
+                                              child: Text(
+                                                "按时间排序",
+                                                style: TextStyle(fontSize: 18),
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  isSortByTime = true;
+                                                });
+                                                Navigator.pop(context);
+                                                onRefreshData();
+                                              },
+                                            ),
+                                            SimpleDialogOption(
+                                              child: Text(
+                                                "按价格排序",
+                                                style: TextStyle(fontSize: 18),
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  isSortByTime = false;
+                                                });
+                                                Navigator.pop(context);
+                                                onRefreshData();
+                                              },
+                                            )
+                                          ],
+                                        ));
+                                  },
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        child: Icon(Icons.keyboard_arrow_down),
+                                        margin: EdgeInsets.only(top: 5),
+                                      ),
+                                      Text(
+                                        isSortByTime ? "按時間排序" : "按价格排序",
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 18),
+                                      ),
+                                      IconButton(
+                                        onPressed: () => setState(() {
+                                          isAsec = !isAsec;
+                                          onRefreshData();
+                                        }),
+                                        icon: FaIcon(isAsec
+                                            ? FontAwesomeIcons.sortAmountUpAlt
+                                            : FontAwesomeIcons
+                                                .sortAmountDownAlt),
+                                      )
+                                    ],
+                                  ),
                                 )
                               ],
                             ),
-                          )
-                        ],
+                          ),
+                        ),
                       ),
-                    ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                            (context, index) =>
+                                GroupItemView(results: dataList[index]),
+                            childCount: dataList.length),
+                      )
+                    ],
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                          (context, index) => GroupItemView(results: dataList[index]),
-                      childCount: dataList.length),
-                )
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
   }
 
   Future<void> onRefreshData() async {
     NetworkUtil.isConnected().then((value) {
       if (value) {
         CommonUtils.showLoadingDialog(context, "加载资料中...");
-        if (Global.API_TOKEN.isEmpty) {
-          NetworkUtil.doLogin(context, () {
-            currentPage = 1;
-            NetworkUtil.get(getUrl(), true, (respone) {
-              currentPage++;
-              ProductResponeBean productResponeBean =
-                  ProductResponeBean.fromJson(
-                      jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-              setState(() {
-                dataList.clear();
-                dataList.addAll(productResponeBean.results);
-              });
-              refreshController.finishRefresh(success: true);
-              Navigator.pop(context);
-            }, (erro) {
-              refreshController.finishRefresh(success: false);
-              Navigator.pop(context);
-            });
+        isLoading = true;
+        currentPage = 1;
+        NetworkUtil.get(getUrl(), true, (respone) {
+          currentPage++;
+          ProductResponeBean productResponeBean = ProductResponeBean.fromJson(
+              jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+          setState(() {
+            dataList.clear();
+            dataList.addAll(productResponeBean.results);
           });
-        } else {
-          currentPage = 1;
-          NetworkUtil.get(getUrl(), true, (respone) {
-            currentPage++;
-            ProductResponeBean productResponeBean = ProductResponeBean.fromJson(
-                jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-            setState(() {
-              dataList.clear();
-              dataList.addAll(productResponeBean.results);
+          refreshController.finishRefresh(success: true);
+          if (isLoading) {
+            Navigator.pop(context);
+            isLoading = false;
+          }
+        }, (erro) {
+          refreshController.finishRefresh(success: false);
+
+          if (isLoading) {
+            Navigator.pop(context);
+            isLoading = false;
+          }
+          if (erro.statusCode == 401) {
+            NetworkUtil.doLogin(() {
+              onRefreshData();
             });
-            refreshController.finishRefresh(success: true);
-            Navigator.pop(context);
-          }, (erro) {
-            refreshController.finishRefresh(success: false);
-            Navigator.pop(context);
-          });
-        }
+          } else if (erro.statusCode == 400) {
+            Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
+            NetworkUtil.doLogin(() {
+              onRefreshData();
+            });
+          }
+        });
       } else {
         CommonUtils.showToast(context, "請檢查網絡！");
         refreshController.finishRefresh(success: false);
@@ -243,38 +279,24 @@ class _PriceListPageState extends State<PriceListPage> {
   Future<void> onLoadMoreData() async {
     NetworkUtil.isConnected().then((value) {
       if (value) {
-        if (Global.API_TOKEN.isEmpty) {
-          NetworkUtil.doLogin(context, () {
-            NetworkUtil.get(getUrl(), true, (respone) {
-              currentPage++;
-              ProductResponeBean productResponeBean =
-                  ProductResponeBean.fromJson(
-                      jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-              dataList.addAll(productResponeBean.results);
-              setState(() {});
-            }, (erro) {});
-          });
-        } else {
-          NetworkUtil.get(getUrl(), true, (respone) {
-            currentPage++;
-            ProductResponeBean productResponeBean = ProductResponeBean.fromJson(
-                jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-            dataList.addAll(productResponeBean.results);
-            setState(() {});
-          }, (erro) {
-            NetworkUtil.doLogin(context, () {
-              NetworkUtil.get("/product?page=" + currentPage.toString(), true,
-                  (respone) {
-                currentPage++;
-                ProductResponeBean productResponeBean =
-                    ProductResponeBean.fromJson(
-                        jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
-                dataList.addAll(productResponeBean.results);
-                setState(() {});
-              }, (erro) {});
+        NetworkUtil.get(getUrl(), true, (respone) {
+          currentPage++;
+          ProductResponeBean productResponeBean = ProductResponeBean.fromJson(
+              jsonDecode(Utf8Decoder().convert(respone.bodyBytes)));
+          dataList.addAll(productResponeBean.results);
+          setState(() {});
+        }, (erro) {
+          if (erro.statusCode == 401) {
+            NetworkUtil.doLogin(() {
+              onLoadMoreData();
             });
-          });
-        }
+          } else if (erro.statusCode == 400) {
+            Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
+            NetworkUtil.doLogin(() {
+              onLoadMoreData();
+            });
+          }
+        });
       } else {
         CommonUtils.showToast(context, "請檢查網絡！");
       }

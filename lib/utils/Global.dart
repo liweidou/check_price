@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Global {
   static String API_TOKEN = "";
-  static String TOKEN_PREFIX = "Bearer";
+  static String TOKEN_PREFIX = "JWT";
   static String HAS_GUIDE_KEY = "has_guide_key";
   static String AGREE_USE_KEY = "agree_use_key";
   static String REFRESH_TOKEN_KEY = "refresh_token_key";

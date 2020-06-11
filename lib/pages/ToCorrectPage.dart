@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:check_price/beans/ProductResponeBean.dart';
 import 'package:check_price/customWidgets/LoadingDialog.dart';
 import 'package:check_price/utils/CommonUtils.dart';
+import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -147,7 +148,19 @@ class _ToCorrectPageState extends State<ToCorrectPage> with WidgetsBindingObserv
       Navigator.pop(context,true);
     }, (erro) {
       Navigator.pop(context);
-      CommonUtils.showToast(context,"提交糾錯失敗！");
+      if(erro.statusCode == 401){
+        NetworkUtil.doLogin((){
+          postCorrection();
+        });
+      }else if(erro.statusCode == 400){
+        Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
+        NetworkUtil.doLogin((){
+          postCorrection();
+        });
+      }else{
+        CommonUtils.showToast(context,"提交糾錯失敗！");
+      }
+
     });
   }
 }

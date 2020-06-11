@@ -1,26 +1,15 @@
 class LoginResponeBean {
-  String _refresh;
-  String _access;
+  String token;
 
-  LoginResponeBean({String refresh, String access}) {
-    this._refresh = refresh;
-    this._access = access;
-  }
-
-  String get refresh => _refresh;
-  set refresh(String refresh) => _refresh = refresh;
-  String get access => _access;
-  set access(String access) => _access = access;
+  LoginResponeBean({this.token});
 
   LoginResponeBean.fromJson(Map<String, dynamic> json) {
-    _refresh = json['refresh'];
-    _access = json['access'];
+    token = json['token'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['refresh'] = this._refresh;
-    data['access'] = this._access;
+    data['token'] = this.token;
     return data;
   }
 }

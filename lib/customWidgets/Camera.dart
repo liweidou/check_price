@@ -202,7 +202,7 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver {
                 ),
                 if (widget.mode == CameraMode.fullscreen)
                   Container(
-                    margin: EdgeInsets.only(top: height - height / 3),
+                    margin: EdgeInsets.only(top: height - height / 4),
                     child: StreamBuilder<Object>(
                         stream: bloc.imagePath.stream,
                         builder: (context, snapshot) {

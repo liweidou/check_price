@@ -20,6 +20,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_guidance_plugin/flutter_guidance_plugin.dart';
 import 'package:imei_plugin/imei_plugin.dart';
+import 'package:launch_review/launch_review.dart';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -48,10 +50,14 @@ class _HomePageState extends State<HomePage>
 
   FirebaseStorage storage;
 
+  GlobalKey searchKey = GlobalKey();
+  GlobalKey photoKey = GlobalKey();
+
   BannerAd createBannerAd() {
     return BannerAd(
       adUnitId: (Platform.isIOS || Platform.isMacOS)
-          ? "ca-app-pub-5426843524329045/3629387819" : "ca-app-pub-5426843524329045/3281903454",
+          ? "ca-app-pub-5426843524329045/3629387819"
+          : "ca-app-pub-5426843524329045/3281903454",
       size: AdSize.banner,
       targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
@@ -136,8 +142,21 @@ class _HomePageState extends State<HomePage>
           }
         }, (erro) {
           Navigator.pop(context);
-          CommonUtils.showToast(context, "您沒有上傳權限，請提意見給我們！");
-          NetworkUtil.registerDevice(context);
+          if (erro.statusCode == 401) {
+            NetworkUtil.doLogin(() {
+              _uploadFiles(imageFile);
+            });
+          } else if (erro.statusCode == 400) {
+            Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
+            NetworkUtil.doLogin(() {
+              NetworkUtil.registerDevice(context, () {
+                _uploadFiles(imageFile);
+              });
+            });
+          } else {
+            CommonUtils.showToast(context, "您沒有上傳權限，請提意見給我們！");
+            NetworkUtil.registerDevice(context, () {});
+          }
         });
       } else {
         CommonUtils.showToast(context, "請檢查網絡！");
@@ -180,19 +199,28 @@ class _HomePageState extends State<HomePage>
     List<CurvePoint> curvePointList = [];
 
     ///创建指引
+    RenderBox sbox = searchKey.currentContext.findRenderObject();
+    Offset soffset = sbox.localToGlobal(Offset.zero);
     CurvePoint curvePoint = CurvePoint(0, 0);
     curvePoint.x = double.parse("0.5");
-    curvePoint.y = double.parse(
-        (0.5 + (3 / MediaQuery.of(context).size.height)).toString());
-    curvePoint.tipsMessage = "点击这里进入搜索商品价格页面！";
+//    curvePoint.y = double.parse(
+//        (0.5 + (3 / MediaQuery.of(context).size.height)).toString());
+    curvePoint.y = (soffset.dy + 20) / MediaQuery.of(context).size.height;
+    curvePoint.tipsMessage = "點擊這裡進入搜索商品價格頁面！";
     curvePoint.nextString = "下一步";
     curvePointList.add(curvePoint);
 
+    print("x:" + soffset.dx.toString() + " y:" + soffset.dy.toString());
+    print("x:" + soffset.dx.toString() + " y:" + soffset.dy.toString());
+
+    RenderBox pbox = photoKey.currentContext.findRenderObject();
+    Offset poffset = pbox.localToGlobal(Offset.zero);
     CurvePoint curvePoint1 = CurvePoint(0, 0);
     curvePoint1.x = double.parse("0.5");
-    curvePoint1.y = double.parse(
-        (0.5 + (87 / MediaQuery.of(context).size.height)).toString());
-    curvePoint1.tipsMessage = "点击这里进入搜索商品价格页面！";
+//    curvePoint1.y = double.parse(
+//        (0.5 + (87 / MediaQuery.of(context).size.height)).toString());
+    curvePoint1.y = (poffset.dy + 40) / MediaQuery.of(context).size.height;
+    curvePoint1.tipsMessage = "點擊這裡進入拍攝收據頁面！";
     curvePoint1.nextString = "完成";
     curvePointList.add(curvePoint1);
     return curvePointList;
@@ -200,11 +228,12 @@ class _HomePageState extends State<HomePage>
 
   void initPrefrence() async {
     Global.preferences = await SharedPreferences.getInstance();
+    Global.API_TOKEN = Global.preferences.getString(Global.REFRESH_TOKEN_KEY);
     NetworkUtil.isConnected().then((value) {
       if (value) {
         showDialog(
-            context: context, builder: (context) => LoadingDialog("正在获取权限..."));
-        NetworkUtil.doLogin(context, () {
+            context: context, builder: (context) => LoadingDialog("初始化中..."));
+        NetworkUtil.doLogin(() {
           Navigator.pop(context);
           if (Global.preferences.getBool(Global.HAS_GUIDE_KEY) == null ||
               !Global.preferences.getBool(Global.HAS_GUIDE_KEY)) {
@@ -224,6 +253,7 @@ class _HomePageState extends State<HomePage>
               });
             });
           }
+          NetworkUtil.registerDevice(context, () {});
           getSumCount();
         });
       }
@@ -248,7 +278,18 @@ class _HomePageState extends State<HomePage>
         }
       });
       animationController.forward();
-    }, (erro) {});
+    }, (erro) {
+      if (erro.statusCode == 401) {
+        NetworkUtil.doLogin(() {
+          getSumCount();
+        });
+      } else if (erro.statusCode == 400) {
+        Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
+        NetworkUtil.doLogin(() {
+          getSumCount();
+        });
+      }
+    });
   }
 
   @override
@@ -281,126 +322,181 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: MediaQuery.of(context).size.height,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              flex: 2,
-              child: Text(""),
-            ),
-            Container(
-              child: Text(
-                "全民格價",
-                style: TextStyle(color: Colors.black, fontSize: 34),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 30),
-              child: Text(
-                "萬眾同心 齊齊慳錢",
-                style: TextStyle(color: Colors.black, fontSize: 17),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 30),
-              child: Text(
-                "已經收集了 " + count.toString() + " 張收據",
-                style: TextStyle(color: Color(0xff666666), fontSize: 17),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Text(""),
-            ),
-            Container(
-              width: 200,
-              height: 70,
-              child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(35),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                          builder: (context) => SearchPage()));
-                },
-                color: Color(0xff568AFF),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                        margin: EdgeInsets.only(left: 10),
-                        child: Icon(
-                          Icons.search,
-                          color: Colors.white,
-                          size: 45,
-                        )),
-                    Container(
-                      margin: EdgeInsets.only(left: 8),
-                      child: Text(
-                        "商品格價",
-                        style: TextStyle(color: Colors.white, fontSize: 21),
-                      ),
-                    )
-                  ],
+      body: SafeArea(
+        top: true,
+        child: Container(
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.topRight,
+                margin: EdgeInsets.only(top: 20, right: 8),
+                child: FlatButton(
+                  onPressed: () {
+                    Share.share(Platform.isAndroid
+                        ? "https:xxx/android/"
+                        : "https:xxx/ios/");
+                  },
+                  child: Text(
+                    "分享給朋友",
+                    style: TextStyle(color: Color(0xff4a4a4a), fontSize: 14),
+                  ),
                 ),
               ),
-            ),
-            Container(
-              width: 200,
-              height: 70,
-              margin: EdgeInsets.only(top: 15),
-              child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(35),
-                ),
-                onPressed: () {
-                  takePhoto();
-                },
-                color: Color(0xffF4B400),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                        margin: EdgeInsets.only(left: 10),
-                        child: Icon(
-                          Icons.crop_free,
-                          color: Colors.white,
-                          size: 45,
-                        )),
-                    Container(
-                      margin: EdgeInsets.only(left: 8),
-                      child: Text(
-                        "收據拍照",
-                        style: TextStyle(color: Colors.white, fontSize: 21),
-                      ),
-                    )
-                  ],
-                ),
+              Expanded(
+                flex: 1,
+                child: Text(""),
               ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 107),
-              child: FlatButton(
+              Container(
                 child: Text(
-                  "意見回饋",
-                  style: TextStyle(color: Color(0xff4A4A4A), fontSize: 14),
+                  "全民格價",
+                  style: TextStyle(color: Colors.black, fontSize: 34),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                          builder: (context) => AdvisePage()));
-                },
               ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(""),
-            ),
-          ],
+              Container(
+                margin: EdgeInsets.only(top: 20),
+                child: Text(
+                  "全民應用科技",
+                  style: TextStyle(color: Colors.black, fontSize: 17),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 10),
+                child: Text(
+                  "齊齊慳錢",
+                  style: TextStyle(color: Colors.black, fontSize: 17),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 30),
+                child: Text(
+                  "已經收集了 " + count.toString() + " 張收據",
+                  style: TextStyle(color: Color(0xff666666), fontSize: 17),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(""),
+              ),
+              Container(
+                key: searchKey,
+                width: 200,
+                height: 70,
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(35),
+                  ),
+                  onPressed: () {
+                    Navigator.push(context,
+                        CupertinoPageRoute(builder: (context) => SearchPage()));
+                  },
+                  color: Color(0xff568AFF),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                          margin: EdgeInsets.only(left: 10),
+                          child: Icon(
+                            Icons.search,
+                            color: Colors.white,
+                            size: 45,
+                          )),
+                      Container(
+                        margin: EdgeInsets.only(left: 8),
+                        child: Text(
+                          "商品格價",
+                          style: TextStyle(color: Colors.white, fontSize: 21),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                key: photoKey,
+                width: 200,
+                height: 70,
+                margin: EdgeInsets.only(top: 15),
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(35),
+                  ),
+                  onPressed: () {
+                    takePhoto();
+                  },
+                  color: Color(0xffF4B400),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                          margin: EdgeInsets.only(left: 10),
+                          child: Icon(
+                            Icons.crop_free,
+                            color: Colors.white,
+                            size: 45,
+                          )),
+                      Container(
+                        margin: EdgeInsets.only(left: 8),
+                        child: Text(
+                          "收據拍照",
+                          style: TextStyle(color: Colors.white, fontSize: 21),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 70),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 1,
+                      child: Text(""),
+                    ),
+                    FlatButton(
+                      child: Text(
+                        "檢測更新",
+                        style:
+                            TextStyle(color: Color(0xff4A4A4A), fontSize: 14),
+                      ),
+                      onPressed: () {
+                        LaunchReview.launch(
+                            androidAppId: "com.infitack.check_price",
+                            iOSAppId: "666666");
+                      },
+                    ),
+                    Container(
+                      width: 14,
+                      height: 20,
+                      alignment: Alignment.center,
+                      child: Text("|"),
+                    ),
+                    FlatButton(
+                      child: Text(
+                        "意見回饋",
+                        style:
+                            TextStyle(color: Color(0xff4A4A4A), fontSize: 14),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) => AdvisePage()));
+                      },
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(""),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(""),
+              ),
+            ],
+          ),
         ),
       ),
     );
