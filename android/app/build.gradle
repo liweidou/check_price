@@ -28,6 +28,16 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     compileSdkVersion 28
 
+    signingConfigs {
+        release {
+            keyAlias "infitack"
+            keyPassword "123456"
+            storeFile file("key/infitack.jks")
+            storePassword "123456"
+        }
+    }
+
+
     lintOptions {
         disable 'InvalidPackage'
     }
@@ -55,7 +65,7 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 

@@ -20,7 +20,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_guidance_plugin/flutter_guidance_plugin.dart';
 import 'package:imei_plugin/imei_plugin.dart';
-import 'package:launch_review/launch_review.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage>
 
   void initFireBase() async {
     final FirebaseApp app = await FirebaseApp.configure(
-      name: 'test',
+      name: '全民格價',
       options: FirebaseOptions(
         googleAppID: (Platform.isIOS || Platform.isMacOS)
             ? '1:336897268673:ios:7fa150b8347f588bafed40'
@@ -80,6 +80,11 @@ class _HomePageState extends State<HomePage>
     );
     storage = FirebaseStorage(
         app: app, storageBucket: 'gs://pricetags-277703.appspot.com');
+    FirebaseAdMob.instance.initialize(
+        appId: Platform.isAndroid
+            ? 'ca-app-pub-5426843524329045~3274164592'
+            : 'ca-app-pub-5426843524329045~5102800320');
+    initAndShowBanner();
   }
 
   Future<void> _uploadFiles(File imageFile) async {
@@ -168,15 +173,13 @@ class _HomePageState extends State<HomePage>
   void initState() {
     // TODO: implement initState
     super.initState();
-    FirebaseAdMob.instance.initialize(
-        appId: Platform.isAndroid
-            ? 'ca-app-pub-5426843524329045~3274164592'
-            : 'ca-app-pub-5426843524329045~5102800320');
+
     initPrefrence();
 
     WidgetsBinding.instance.addObserver(this);
 
     initFireBase();
+
   }
 
   void initAndShowBanner() {
@@ -339,7 +342,7 @@ class _HomePageState extends State<HomePage>
                         : "https:xxx/ios/");
                   },
                   child: Text(
-                    "分享給朋友",
+                    "介紹給朋友",
                     style: TextStyle(color: Color(0xff4a4a4a), fontSize: 14),
                   ),
                 ),
@@ -455,14 +458,15 @@ class _HomePageState extends State<HomePage>
                     ),
                     FlatButton(
                       child: Text(
-                        "檢測更新",
+                        "官方網站",
                         style:
                             TextStyle(color: Color(0xff4A4A4A), fontSize: 14),
                       ),
-                      onPressed: () {
-                        LaunchReview.launch(
-                            androidAppId: "com.infitack.check_price",
-                            iOSAppId: "666666");
+                      onPressed: () async {
+//                        LaunchReview.launch(
+//                            androidAppId: "com.infitack.check_price",
+//                            iOSAppId: "666666");
+                        await launch("http://pricetag.morephil.com/");
                       },
                     ),
                     Container(
@@ -520,7 +524,22 @@ class _HomePageState extends State<HomePage>
             builder: (context) {
               return new CupertinoAlertDialog(
                 title: new Text("使用條款"),
-                content: new Text("内容内容内容内容内容内容内容内容内容内容内容"),
+                content: new Text("「全民格價」是由「morephil.com」（下稱我們）所經營之APP(下稱本APP)各項服務與資訊。 "
+                    "以下是我們的隱私權保護政策，幫助您瞭解本APP所蒐集的個人資料之運用及保護方式。 一、隱私權保護政策的適用範圍     "
+                    "（1）請您在於使用本APP服務前，確認您已審閱並同意本隱私權政策所列全部條款，若您不同意全部或部份者，則請勿使用本APP服務。"
+                    "     （2）隱私權保護政策內容，包括我們如何處理您在使用本APP服務時蒐集到的個人識別資料。   "
+                    "  （3）隱私權保護政策不適用於本APP以外的相關連結網站，亦不適用於非我們所委託或參與管理之人員。"
+                    " 二、個人資料的蒐集及使用    "
+                    " （1）本APP並不會蒐集任何有關個人的身份資料。 三、對外的相關連結 本APP上有可能包含其他合作網站或網頁連結，"
+                    "該網站或網頁也有可能會蒐集您的個人資料，不論其內容或隱私權政策為何，皆與本APP 無關，"
+                    "您應自行參考該連結網站中的隱私權保護政策，我們不負任何連帶責任。四、Cookie之使用     "
+                    "（1）為了提供您最佳的服務，本網站會在您的電腦中放置並取用我們的Cookie，若您不願接受Cookie的寫入，"
+                    "您可在您使用的瀏覽器功能項中設定隱私權等級為高，即可拒絕Cookie的寫入，但可能會導致網站某些功能無法正常執行 。 "
+                    "以下是可能使用的Cookie範例:         •session cookies. 用來維護應用程式的狀態         •Preference Cookies."
+                    " 用來記錄您的喜好與設定         •Security Cookies. 用來控制安全和檢查 "
+                    "五、未成年人保護 未成年人於註冊或使用本服務而同意本公司蒐集、利用其個人資訊時，應按其年齡由其法定代理人代為或在法定代理人之同意下為之。"
+                    "六、隱私權政策的修訂 我們將因應需求擁有隨時修改本隱私權保護政策的權利，當我們做出修改時，會於本APP公告，且自公告日起生效，不再另行通知。"
+                ),
                 actions: <Widget>[
                   new FlatButton(
                     onPressed: () {
