@@ -16,16 +16,24 @@ class _SearchPageState extends State<SearchPage> with WidgetsBindingObserver {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      FocusScope.of(context).requestFocus(focusNode);
+       Future.delayed(Duration(milliseconds: 300),()=>  FocusScope.of(context).requestFocus(focusNode));
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        leading: IconButton(
+          onPressed: (){
+            FocusScope.of(context).unfocus();
+            Future.delayed(Duration(milliseconds: 100),
+                    () => Navigator.pop(context));
+          },
+          icon: Icon(Icons.arrow_back_ios,color: Colors.black,),
+        ),
         centerTitle: true,
         title: Text("搜索商品"),
       ),
@@ -35,9 +43,14 @@ class _SearchPageState extends State<SearchPage> with WidgetsBindingObserver {
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(top: 131),
-              child: Text(
-                "全民格價",
-                style: TextStyle(color: Colors.black, fontSize: 34),
+              child: Hero(
+                tag: "title",
+                child: FlatButton(
+                  child: Text(
+                    "全民格價",
+                    style: TextStyle(color: Colors.black, fontSize: 34),
+                  ),
+                ),
               ),
             ),
             Container(

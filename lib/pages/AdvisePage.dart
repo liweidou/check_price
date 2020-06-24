@@ -7,9 +7,8 @@ import 'package:check_price/utils/Global.dart';
 import 'package:check_price/utils/NetworkUtil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
-class AdvisePage extends StatefulWidget with WidgetsBindingObserver{
+class AdvisePage extends StatefulWidget with WidgetsBindingObserver {
   @override
   _AdvisePageState createState() => _AdvisePageState();
 }
@@ -23,7 +22,8 @@ class _AdvisePageState extends State<AdvisePage> {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      FocusScope.of(context).requestFocus(focusNode);
+      Future.delayed(Duration(milliseconds: 300),
+          () => FocusScope.of(context).requestFocus(focusNode));
     });
   }
 
@@ -32,7 +32,17 @@ class _AdvisePageState extends State<AdvisePage> {
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        leading: IconButton(
+          onPressed: () {
+            FocusScope.of(context).unfocus();
+            Future.delayed(Duration(milliseconds: 100),
+                    () => Navigator.pop(context));
+          },
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: Colors.black,
+          ),
+        ),
         centerTitle: true,
         title: Text("意見回饋"),
         actions: <Widget>[
@@ -59,7 +69,7 @@ class _AdvisePageState extends State<AdvisePage> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 13,bottom: 13),
+              margin: EdgeInsets.only(top: 13, bottom: 13),
               color: Colors.white,
               child: TextField(
                 cursorColor: Colors.blue,
@@ -67,11 +77,11 @@ class _AdvisePageState extends State<AdvisePage> {
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 focusNode: focusNode,
-                autofocus: true,
                 controller: contentCtr,
                 decoration: InputDecoration(
                   hintText: "内容",
-                  contentPadding: EdgeInsets.only(left: 16,bottom: 16,top: 16),
+                  contentPadding:
+                      EdgeInsets.only(left: 16, bottom: 16, top: 16),
                   focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.transparent)),
                   enabledBorder: UnderlineInputBorder(
@@ -98,17 +108,17 @@ class _AdvisePageState extends State<AdvisePage> {
           CupertinoPageRoute(builder: (context) => ThanksAdvisePage()));
     }, (erro) {
       Navigator.pop(context);
-      if(erro.statusCode == 401){
-        NetworkUtil.doLogin((){
+      if (erro.statusCode == 401) {
+        NetworkUtil.doLogin(() {
           postAdvise(text);
         });
-      }else if(erro.statusCode == 400){
+      } else if (erro.statusCode == 400) {
         Global.preferences.setString(Global.REFRESH_TOKEN_KEY, "");
-        NetworkUtil.doLogin((){
+        NetworkUtil.doLogin(() {
           postAdvise(text);
         });
-      }else{
-        CommonUtils.showToast(context,"提交意見失敗！");
+      } else {
+        CommonUtils.showToast(context, "提交意見失敗！");
       }
     });
   }
