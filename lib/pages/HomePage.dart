@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage>
                   onPressed: () {
                     Share.share(Platform.isAndroid
                         ? "https://play.google.com/store/apps/details?id=com.infitack.check_price"
-                        : "https:xxx/ios/");
+                        : "https://apps.apple.com/app/id1515103936");
                   },
                   child: Text(
                     "介紹給朋友",
